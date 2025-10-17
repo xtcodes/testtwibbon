@@ -3,307 +3,220 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Formatter HTML • CSS • JS — Simple</title>
+  <title>Formatter HTML • CSS • JS</title>
   <style>
-    :root{--bg:#0f1724;--card:#0b1220;--muted:#94a3b8;--accent:#06b6d4}
-    *{box-sizing:border-box}
-    body{font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; margin:0; background:linear-gradient(180deg,#071025 0%, #071a2b 100%); color:#e6eef6; padding:24px}
-    .wrap{max-width:1100px;margin:0 auto}
-    header{display:flex;align-items:center;gap:16px;margin-bottom:18px}
-    h1{font-size:20px;margin:0}
-    p.lead{margin:0;color:var(--muted);font-size:13px}
-
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .card{background:rgba(255,255,255,0.03);border-radius:10px;padding:12px;min-height:220px;display:flex;flex-direction:column}
-    label{font-size:13px;color:var(--muted);margin-bottom:6px}
-    textarea{flex:1;background:transparent;border:1px dashed rgba(255,255,255,0.04);color:inherit;padding:10px;border-radius:8px;resize:vertical;min-height:160px;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace;font-size:13px}
-    .controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-    button{background:var(--accent);border:0;padding:8px 12px;border-radius:8px;color:#062b33;cursor:pointer;font-weight:600}
-    button.ghost{background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.04)}
-    .output{background:#021124;border-radius:8px;padding:10px;min-height:120px;overflow:auto;font-family:ui-monospace,monospace;font-size:13px}
-    .row{display:flex;gap:12px;align-items:center}
-    .full{grid-column:1/-1}
-    footer{margin-top:14px;color:var(--muted);font-size:13px}
-    .small{font-size:12px;color:var(--muted)}
-    @media (max-width:900px){.grid{grid-template-columns:1fr}.full{grid-column:1}}
+    :root {
+      --bg: #f7f8fa;
+      --text: #222;
+      --muted: #666;
+      --accent: #007bff;
+      --border: #ddd;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 20px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1em;
+    }
+    h1 { margin: 0; font-size: 1.2em; }
+    .tabs {
+      display: flex;
+      gap: 8px;
+    }
+    .tab {
+      cursor: pointer;
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: white;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .tab.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+    .card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    label { font-size: 13px; color: var(--muted); }
+    textarea {
+      width: 100%;
+      min-height: 180px;
+      font-family: monospace;
+      font-size: 13px;
+      padding: 8px;
+      margin-top: 6px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      resize: vertical;
+    }
+    .controls { margin-top: 8px; display: flex; gap: 8px; }
+    button {
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      background: var(--accent);
+      color: white;
+      font-weight: 500;
+    }
+    button.ghost {
+      background: white;
+      color: var(--muted);
+    }
+    .output {
+      background: #f0f0f0;
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 12px;
+      min-height: 120px;
+      font-family: monospace;
+      font-size: 13px;
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div>
-        <h1>Formatter HTML • CSS • JS — Simple</h1>
-        <p class="lead">Tempelkan kode Anda, klik "Format". Tool ini melakukan format cepat tanpa dependensi eksternal.</p>
-      </div>
-    </header>
-
-    <div class="grid">
-      <div class="card">
-        <label>HTML</label>
-        <textarea id="htmlIn" placeholder="Tempel HTML di sini..."></textarea>
-        <div class="controls">
-          <button id="formatHtml">Format HTML</button>
-          <button id="copyHtml" class="ghost">Copy</button>
-          <button id="downloadHtml" class="ghost">Download</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <label>CSS</label>
-        <textarea id="cssIn" placeholder="Tempel CSS di sini..."></textarea>
-        <div class="controls">
-          <button id="formatCss">Format CSS</button>
-          <button id="copyCss" class="ghost">Copy</button>
-          <button id="downloadCss" class="ghost">Download</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <label>JavaScript</label>
-        <textarea id="jsIn" placeholder="Tempel JS di sini..."></textarea>
-        <div class="controls">
-          <button id="formatJs">Format JS</button>
-          <button id="copyJs" class="ghost">Copy</button>
-          <button id="downloadJs" class="ghost">Download</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <label>Hasil (Pratinjau)</label>
-        <div style="display:flex;gap:8px;margin-bottom:8px">
-          <button id="formatAll">Format Semua</button>
-          <button id="copyAll" class="ghost">Copy Semua (HTML+CSS+JS)</button>
-          <button id="downloadAll" class="ghost">Download Semua</button>
-        </div>
-        <div class="output" id="result" spellcheck="false">Hasil akan tampil di sini setelah Anda menekan tombol Format.</div>
-        <div class="small" style="margin-top:8px">Catatan: Formatter ini ditujukan untuk rapi cepat. Untuk format sempurna gunakan alat khusus (Prettier, js-beautify) di pipeline anda.</div>
-      </div>
-
+  <header>
+    <h1>Formatter HTML • CSS • JS</h1>
+    <div class="tabs">
+      <div class="tab active" data-type="html">HTML</div>
+      <div class="tab" data-type="css">CSS</div>
+      <div class="tab" data-type="js">JS</div>
     </div>
-    <footer>
-      Dibuat untuk kebutuhan cepat — men-support paste, copy, dan download. Jika ingin fitur Prettier/opsi konfigurasi, beri tahu saya.
-    </footer>
+  </header>
+
+  <div class="card">
+    <label id="labelTitle">HTML</label>
+    <textarea id="inputArea" placeholder="Tempel kode di sini..."></textarea>
+    <div class="controls">
+      <button id="btnFormat">Format</button>
+      <button id="btnCopy" class="ghost">Copy</button>
+      <button id="btnDownload" class="ghost">Download</button>
+    </div>
+    <div class="output" id="output">Hasil format akan muncul di sini.</div>
   </div>
 
 <script>
-// Utility: download text as file
-function downloadText(filename, text){
-  const a = document.createElement('a');
-  const blob = new Blob([text], {type: 'text/plain'});
-  a.href = URL.createObjectURL(blob);
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
-}
+let currentTab = 'html';
+const inputArea = document.getElementById('inputArea');
+const output = document.getElementById('output');
+const labelTitle = document.getElementById('labelTitle');
+const tabs = document.querySelectorAll('.tab');
+const storage = { html: '', css: '', js: '' };
 
-// Copy to clipboard
-async function copyText(text){
-  try{ await navigator.clipboard.writeText(text); alert('Disalin ke clipboard'); }catch(e){ alert('Gagal menyalin: ' + e.message); }
-}
+function indent(level, size = 2){ return ' '.repeat(level * size); }
 
-// Simple HTML formatter: traverse DOM and create indented output
-function formatHTML(input, indentSize=2){
+function formatHTML(input){
   input = input.trim();
-  // If input is a fragment, wrap in a container
   const wrapper = document.createElement('div');
   wrapper.innerHTML = input;
-
   function dump(node, level){
-    const indent = ' '.repeat(level*indentSize);
+    const space = indent(level);
     let out = '';
     if (node.nodeType === Node.TEXT_NODE){
-      const text = node.nodeValue.replace(/\s+/g,' ');
-      if (text.trim()) out += indent + text.trim() + '\n';
+      const text = node.nodeValue.replace(/\s+/g,' ').trim();
+      if(text) out += space + text + '\n';
       return out;
     }
     if (node.nodeType !== Node.ELEMENT_NODE) return out;
     const tag = node.tagName.toLowerCase();
-    let openTag = '<' + tag;
-    for (let i=0;i<node.attributes.length;i++){
-      const a = node.attributes[i];
-      openTag += ' ' + a.name + '="' + a.value + '"';
-    }
-    openTag += '>';
+    let open = '<' + tag;
+    for(let a of node.attributes){ open += ' ' + a.name + '="' + a.value + '"'; }
+    open += '>';
     const children = Array.from(node.childNodes).filter(n => !(n.nodeType===3 && !n.nodeValue.trim()));
-    if(children.length===0){
-      out += indent + openTag.replace(/>$/,'/>') + '\n';
-    } else {
-      out += indent + openTag + '\n';
+    if(children.length===0){ out += space + open.replace(/>$/,'/>') + '\n'; }
+    else {
+      out += space + open + '\n';
       children.forEach(c => out += dump(c, level+1));
-      out += indent + '</' + tag + '>' + '\n';
+      out += space + '</' + tag + '>\n';
     }
     return out;
   }
-
-  let result = '';
-  Array.from(wrapper.childNodes).forEach(n => { result += dump(n, 0); });
-  return result.trim();
+  let res = '';
+  wrapper.childNodes.forEach(n => res += dump(n,0));
+  return res.trim();
 }
 
-// Simple CSS formatter
-function formatCSS(input, indentSize=2){
-  const lines = input.split(/\n/).map(l=>l.trim()).filter(Boolean);
-  let out = '';
-  let indentLevel = 0;
-  let buffer = '';
-  for (let i=0;i<lines.length;i++){
-    let line = lines[i];
-    // handle block start
-    if(line.endsWith('{')){
-      out += ' '.repeat(indentLevel*indentSize) + line + '\n';
-      indentLevel++;
-    } else if(line.endsWith('}')){
-      indentLevel = Math.max(0, indentLevel-1);
-      out += ' '.repeat(indentLevel*indentSize) + line + '\n';
-    } else {
-      // maybe multiple declarations on one line
-      const parts = line.split(';').map(p=>p.trim()).filter(Boolean);
-      if(parts.length>1){
-        parts.forEach(p=> out += ' '.repeat(indentLevel*indentSize) + p + ';\n');
-      } else {
-        out += ' '.repeat(indentLevel*indentSize) + line + '\n';
-      }
-    }
+function formatCSS(input, indentSize = 2){
+  const ind = (lvl)=>' '.repeat(lvl*indentSize);
+  let lvl=0, res='', buf='';
+  for(let ch of input){
+    buf += ch;
+    if(ch=='{'){res += buf.trim()+'\n';lvl++;buf=ind(lvl);}
+    else if(ch=='}'){lvl=Math.max(0,lvl-1);res=res.trimEnd()+'\n'+ind(lvl)+'}\n';buf=ind(lvl);}
+    else if(ch==';'){res+=buf.trim()+'\n'+ind(lvl);buf='';}
+  }
+  res += buf.trim();
+  return res.trim();
+}
+
+function formatJS(input, indentSize = 2){
+  let out='',lvl=0,inStr=false,strChar='';
+  for(let i=0;i<input.length;i++){
+    const ch=input[i];
+    if(!inStr && (ch==='"'||ch==="'"||ch==='`')){inStr=true;strChar=ch;out+=ch;continue;}
+    if(inStr){out+=ch;if(ch===strChar && input[i-1]!=='\\')inStr=false;continue;}
+    if(ch=='{'){lvl++;out+='{\n'+indent(lvl,indentSize);continue;}
+    if(ch=='}'){lvl=Math.max(0,lvl-1);out+='\n'+indent(lvl,indentSize)+'}';continue;}
+    if(ch==';'){out+=';\n'+indent(lvl,indentSize);continue;}
+    out+=ch;
   }
   return out.trim();
 }
 
-// Simple JS formatter: naive but practical for many cases
-function formatJS(input, indentSize=2){
-  let out = '';
-  let indentLevel = 0;
-  let i = 0;
-  const len = input.length;
-  let token = '';
-  let inString = false, stringChar='';
-  let inLineComment=false, inBlockComment=false;
-
-  while(i<len){
-    const ch = input[i];
-    const nxt = input[i+1];
-
-    // comments
-    if(!inString && !inBlockComment && ch==='/' && nxt==='/' ){ inLineComment = true; out += '\n' + ' '.repeat(indentLevel*indentSize); i+=2; continue; }
-    if(!inString && !inLineComment && ch==='/' && nxt==='*'){ inBlockComment=true; out += '\n' + ' '.repeat(indentLevel*indentSize) + '/*'; i+=2; continue; }
-    if(inBlockComment){ if(ch==='*' && nxt==='/' ){ out += '*\/'; inBlockComment=false; i+=2; continue;} out+=ch; i++; continue; }
-    if(inLineComment){ if(ch==='\n'){ inLineComment=false; out += '\n' + ' '.repeat(indentLevel*indentSize); i++; continue;} out+=ch; i++; continue; }
-
-    // strings
-    if(!inString && (ch==='"' || ch==="'" || ch==='`')){ inString=true; stringChar=ch; out += ch; i++; continue; }
-    if(inString){ out += ch; if(ch===stringChar && input[i-1] !== '\\') inString=false; i++; continue; }
-
-    if(ch === '{'){
-      out = out.trimEnd() + ' {' + '\n';
-      indentLevel++;
-      out += ' '.repeat(indentLevel*indentSize);
-      i++; continue;
-    }
-    if(ch === '}'){
-      indentLevel = Math.max(0, indentLevel-1);
-      out = out.trimEnd() + '\n' + ' '.repeat(indentLevel*indentSize) + '}' ;
-      i++; // if next is ; add it
-      // append newline after block
-      if(input[i]===';'){ out += ';'; i++; }
-      out += '\n' + ' '.repeat(indentLevel*indentSize);
-      continue;
-    }
-    if(ch === ';'){
-      out += ';\n' + ' '.repeat(indentLevel*indentSize);
-      i++; continue;
-    }
-    if(ch === '\n' || ch === '\r'){
-      i++; continue;
-    }
-    out += ch;
-    i++;
-  }
-  // cleanup: remove duplicated spaces at line starts
-  out = out.split('\n').map(l=> l.replace(/\s+$/,'')).join('\n');
-  return out.trim();
-}
-
-// DOM elements
-const htmlIn = document.getElementById('htmlIn');
-const cssIn = document.getElementById('cssIn');
-const jsIn = document.getElementById('jsIn');
-const result = document.getElementById('result');
-
-// Buttons
-document.getElementById('formatHtml').addEventListener('click', ()=>{
+document.getElementById('btnFormat').onclick = ()=>{
+  const val = inputArea.value;
+  if(!val.trim()){output.textContent='Tidak ada input.';return;}
+  let formatted = val;
   try{
-    const f = formatHTML(htmlIn.value||'');
-    htmlIn.value = f;
-    result.textContent = f;
-  }catch(e){ alert('Error formatting HTML: '+e.message); }
+    if(currentTab==='html') formatted = formatHTML(val);
+    if(currentTab==='css') formatted = formatCSS(val);
+    if(currentTab==='js') formatted = formatJS(val);
+  }catch(e){ formatted = 'Error: '+e.message; }
+  storage[currentTab] = formatted;
+  inputArea.value = formatted;
+  output.textContent = formatted;
+};
+
+document.getElementById('btnCopy').onclick = ()=>{
+  navigator.clipboard.writeText(inputArea.value).then(()=>alert('Disalin!'));
+};
+
+document.getElementById('btnDownload').onclick = ()=>{
+  const blob = new Blob([inputArea.value], {type:'text/plain'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`formatted.${currentTab}`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+
+tabs.forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    tabs.forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    currentTab = tab.dataset.type;
+    labelTitle.textContent = currentTab.toUpperCase();
+    inputArea.value = storage[currentTab] || '';
+    output.textContent = storage[currentTab] ? storage[currentTab] : 'Hasil format akan muncul di sini.';
+  });
 });
-
-document.getElementById('formatCss').addEventListener('click', ()=>{
-  try{
-    const f = formatCSS(cssIn.value||'');
-    cssIn.value = f;
-    result.textContent = f;
-  }catch(e){ alert('Error formatting CSS: '+e.message); }
-});
-
-document.getElementById('formatJs').addEventListener('click', ()=>{
-  try{
-    const f = formatJS(jsIn.value||'');
-    jsIn.value = f;
-    result.textContent = f;
-  }catch(e){ alert('Error formatting JS: '+e.message); }
-});
-
-// Format all
-document.getElementById('formatAll').addEventListener('click', ()=>{
-  try{
-    const fh = htmlIn.value? formatHTML(htmlIn.value) : '';
-    const fc = cssIn.value? formatCSS(cssIn.value) : '';
-    const fj = jsIn.value? formatJS(jsIn.value) : '';
-    if(fh) htmlIn.value = fh;
-    if(fc) cssIn.value = fc;
-    if(fj) jsIn.value = fj;
-    // compose preview
-    let composed = '';
-    if(fh) composed += '<!-- HTML -->\n' + fh + '\n\n';
-    if(fc) composed += '/* CSS */\n' + fc + '\n\n';
-    if(fj) composed += '// JS\n' + fj + '\n';
-    result.textContent = composed.trim() || 'Tidak ada input.';
-  }catch(e){ alert('Error formatting: '+e.message); }
-});
-
-// Copy and download handlers
-document.getElementById('copyHtml').addEventListener('click', ()=> copyText(htmlIn.value || ''));
-document.getElementById('copyCss').addEventListener('click', ()=> copyText(cssIn.value || ''));
-document.getElementById('copyJs').addEventListener('click', ()=> copyText(jsIn.value || ''));
-
-document.getElementById('downloadHtml').addEventListener('click', ()=> downloadText('formatted.html', htmlIn.value || ''));
-document.getElementById('downloadCss').addEventListener('click', ()=> downloadText('formatted.css', cssIn.value || ''));
-document.getElementById('downloadJs').addEventListener('click', ()=> downloadText('formatted.js', jsIn.value || ''));
-
-document.getElementById('copyAll').addEventListener('click', ()=>{
-  const all = '<!-- HTML -->\n' + (htmlIn.value||'') + '\n\n/* CSS */\n' + (cssIn.value||'') + '\n\n// JS\n' + (jsIn.value||'');
-  copyText(all);
-});
-
-document.getElementById('downloadAll').addEventListener('click', ()=>{
-  const all = '<!doctype html>\n<html>\n<head>\n<meta charset="utf-8">\n<title>combined</title>\n<style>\n' + (cssIn.value||'') + '\n</style>\n</head>\n<body>\n' + (htmlIn.value||'') + '\n<script>\n' + (jsIn.value||'') + '\n<\/script>\n</body>\n</html>';
-  downloadText('formatted_combined.html', all);
-});
-
-// Download of result view (as plain text)
-document.getElementById('downloadAll').addEventListener('click', ()=>{
-  // handled above
-});
-
-// Small usability: auto-format on Ctrl/Cmd+Enter
-window.addEventListener('keydown', (e)=>{
-  if((e.ctrlKey||e.metaKey) && e.key === 'Enter'){
-    document.getElementById('formatAll').click();
-  }
-});
-
 </script>
 </body>
 </html>
