@@ -3,14 +3,15 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Twibbon Sederhana - Upload & Preview</title>
+  <title>Twibbon Sederhana - Upload & Preview (Perbaikan Drop Area)</title>
   <style>
     :root{--max-width:760px;--gap:12px}
     body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:24px;display:flex;justify-content:center}
-    .card{width:100%;max-width:var(--max-width);box-shadow:0 6px 18px rgba(0,0,0,0.08);border-radius:12px;padding:18px}
+    .card{width:100%;max-width:var(--max-width);box-shadow:0 6px 18px rgba(0,0,0,0.08);border-radius:12px;padding:18px;position:relative}
     h1{font-size:18px;margin:0 0 8px}
-    .upload-area{border:2px dashed #d0d6df;border-radius:8px;padding:28px;text-align:center;cursor:pointer;transition:background .12s}
-    .upload-area:hover{background:#f7f9fc}
+    /* Upload area now a div (not label) so it won't trap focus or cover input */
+    .upload-area{border:2px dashed #d0d6df;border-radius:8px;padding:28px;text-align:center;cursor:pointer;transition:background .12s;z-index:20}
+    .upload-area.hover{background:#f1f7ff}
     .upload-area input{display:none}
     .small{font-size:13px;color:#6b7280}
     .controls{display:flex;gap:var(--gap);margin-top:12px}
@@ -23,10 +24,9 @@
     .preview-canvas{background:#10131a;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:12px}
     canvas{width:100%;height:auto;border-radius:6px}
     .meta{background:#fbfdff;border-radius:8px;padding:12px}
-    .meta p{margin:6px 0;font-size:14px}
     .twibbon-frame{position:relative;display:inline-block}
-    /* Simple twibbon visual: corner ribbon + border */
-    .frame-overlay{position:absolute;inset:0;pointer-events:none;border-radius:6px}
+    /* Frame overlay must not capture pointer events */
+    .frame-overlay{position:absolute;inset:0;pointer-events:none;border-radius:6px;z-index:5}
     .frame-overlay .border{position:absolute;inset:0;border:14px solid rgba(255,255,255,0.18);box-sizing:border-box;border-radius:6px}
     .frame-overlay .ribbon{position:absolute;right:0;top:0;padding:6px 14px;background:linear-gradient(90deg,#ef4444,#f97316);color:white;font-weight:700;border-bottom-left-radius:8px}
     .note{margin-top:10px;font-size:13px;color:#334155}
@@ -34,17 +34,17 @@
 </head>
 <body>
   <div class="card">
-    <h1>Twibbon - Upload & Preview (Sederhana)</h1>
+    <h1>Twibbon - Upload & Preview (Perbaikan)</h1>
     <p class="small">Alur: upload gambar → isi nama twibbon → lihat preview & keterangan.</p>
 
-    <!-- STEP 1: Upload area -->
-    <label class="upload-area" id="uploadArea">
+    <!-- STEP 1: Upload area (div, bukan label) -->
+    <div class="upload-area" id="uploadArea" tabindex="0">
       <input id="fileInput" type="file" accept="image/*" />
       <div>
-        <strong>Klik atau seret gambar ke sini</strong>
+        <strong id="uploadText">Klik atau seret gambar ke sini</strong>
         <div class="small">PNG/JPG, maksimal 10MB</div>
       </div>
-    </label>
+    </div>
 
     <!-- STEP 2: Nama twibbon (muncul setelah upload) -->
     <div id="nameSection" class="hidden" style="margin-top:12px">
@@ -85,15 +85,12 @@
 
   <script>
     // --- Konfigurasi ---
-    // Jika mau sambungkan ke Supabase: atur useSupabase = true
-    // dan isi supabaseUrl/supabaseKey lalu implementasikan function fetchSupportCount() dan incrementSupportCount()
-    const useSupabase = false;
-    const supabaseUrl = '';
-    const supabaseKey = '';
+    const useSupabase = false; // masih default false
 
     // --- Elemen DOM ---
     const fileInput = document.getElementById('fileInput');
     const uploadArea = document.getElementById('uploadArea');
+    const uploadText = document.getElementById('uploadText');
     const nameSection = document.getElementById('nameSection');
     const twibbonNameInput = document.getElementById('twibbonName');
     const applyNameBtn = document.getElementById('applyName');
@@ -112,14 +109,13 @@
 
     // --- Helper: format waktu lokal (WIB 24h) ---
     function formatTime(date){
-      // Gunakan locale id-ID, 24-hour
       return new Intl.DateTimeFormat('id-ID', {
         year: 'numeric', month: 'long', day: 'numeric',
         hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
       }).format(date);
     }
 
-    // --- Fallback untuk total dukungan: localStorage ---
+    // --- localStorage fallback ---
     const SUPPORT_KEY = 'twibbon_total_support_v1';
     function loadLocalCount(){
       const v = localStorage.getItem(SUPPORT_KEY);
@@ -130,29 +126,40 @@
     function incrementLocalCount(){ currentCount++; saveLocalCount(); updateCountUI(); }
     function updateCountUI(){ metaCount.textContent = currentCount; }
 
-    // --- File upload handling ---
-    uploadArea.addEventListener('click', ()=> fileInput.click());
-    uploadArea.addEventListener('dragover', (e)=>{ e.preventDefault(); uploadArea.style.background = '#f1f7ff'; });
-    uploadArea.addEventListener('dragleave', ()=>{ uploadArea.style.background = ''; });
-    uploadArea.addEventListener('drop', (e)=>{ e.preventDefault(); uploadArea.style.background = ''; const f = e.dataTransfer.files[0]; handleFile(f); });
+    // --- Drag & drop (robust) ---
+    uploadArea.addEventListener('dragover', (e)=>{ e.preventDefault(); uploadArea.classList.add('hover'); });
+    uploadArea.addEventListener('dragleave', ()=>{ uploadArea.classList.remove('hover'); });
+    uploadArea.addEventListener('drop', (e)=>{ e.preventDefault(); uploadArea.classList.remove('hover'); const f = e.dataTransfer.files[0]; handleFile(f); });
 
-    fileInput.addEventListener('change', (e)=> handleFile(e.target.files && e.target.files[0]));
+    // Make uploadArea focusable & trigger file input via single click or Enter/Space
+    uploadArea.addEventListener('click', ()=> fileInput.click());
+    uploadArea.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') { e.preventDefault(); fileInput.click(); } });
+
+    // Ensure fileInput change triggers handleFile once
+    fileInput.addEventListener('change', (e)=>{ if(e.target.files && e.target.files[0]) handleFile(e.target.files[0]); });
 
     function handleFile(file){
       if(!file) return;
       if(!file.type.startsWith('image/')){ alert('Pilih file gambar.'); return; }
+
       const reader = new FileReader();
       reader.onload = (ev)=>{
         const img = new Image();
         img.onload = ()=>{
           loadedImage = img;
+          // HIDE upload area so it can't be 'tertutup' lagi
+          uploadArea.classList.add('hidden');
+          // show name input
           nameSection.classList.remove('hidden');
           // auto-fill default name
-          twibbonNameInput.value = 'Twibbon - ' + file.name.split('.')[0];
+          twibbonNameInput.value = 'Twibbon - ' + (file.name.split('.')[0] || 'gambar');
         };
         img.src = ev.target.result;
       };
       reader.readAsDataURL(file);
+
+      // clear input value so same file can be reselected if user resets
+      fileInput.value = '';
     }
 
     // --- Apply name & render preview ---
@@ -168,13 +175,11 @@
       // draw image into canvas, center-cover
       drawImageCover(ctx, loadedImage, previewCanvas.width, previewCanvas.height);
 
-      // draw a semi-transparent twibbon overlay (corner ribbon + subtle border)
+      // draw overlay with name
       drawTwibbonOverlay(ctx, previewCanvas.width, previewCanvas.height, name);
 
-      // update support count from local or Supabase
       if(useSupabase){
         // TODO: implement fetch from Supabase
-        // fetchSupportCount().then(cnt => { currentCount = cnt; updateCountUI(); });
         updateCountUI();
       } else {
         loadLocalCount();
@@ -183,26 +188,23 @@
 
     resetBtn.addEventListener('click', ()=>{
       loadedImage = null; previewSection.classList.add('hidden'); nameSection.classList.add('hidden');
+      uploadArea.classList.remove('hidden');
       twibbonNameInput.value = '';
       fileInput.value = '';
     });
 
     supportBtn.addEventListener('click', ()=>{
       if(useSupabase){
-        // TODO: increment via Supabase
-        // incrementSupportCount().then(newCnt => { currentCount = newCnt; updateCountUI(); });
         alert('Supabase belum diaktifkan pada contoh ini.');
       } else {
         incrementLocalCount();
       }
     });
 
-    // --- Download composed image ---
     downloadBtn.addEventListener('click', ()=>{
       const dataUrl = previewCanvas.toDataURL('image/png');
       const a = document.createElement('a');
       a.href = dataUrl;
-      // nama file: webname_tanggal-bulan-tahun.png -- gunakan window.location.host sebagai website
       const host = (window.location && window.location.host) ? window.location.host.replace(/[:.]/g,'-') : 'twibbon';
       const now = new Date();
       const yyyy = now.getFullYear();
@@ -214,7 +216,6 @@
 
     // --- Drawing helpers ---
     function drawImageCover(ctx, img, w, h){
-      // cover mode: scale image to cover canvas, centered
       const iw = img.width, ih = img.height;
       const scale = Math.max(w/iw, h/ih);
       const nw = iw * scale, nh = ih * scale;
@@ -224,54 +225,34 @@
     }
 
     function drawTwibbonOverlay(ctx, w, h, name){
-      // subtle dark vignette
       ctx.fillStyle = 'rgba(0,0,0,0.12)';
       ctx.fillRect(0,0,w,h);
-      // border
       ctx.strokeStyle = 'rgba(255,255,255,0.22)';
       ctx.lineWidth = 12; ctx.strokeRect(6,6,w-12,h-12);
-      // ribbon (drawn top-right)
       const ribbonW = Math.floor(w*0.28), ribbonH = 48;
       ctx.save();
       ctx.translate(w,0);
-      // draw a slanted ribbon rectangle
       ctx.beginPath();
       ctx.moveTo(-ribbonW,0);
       ctx.lineTo(0,0);
       ctx.lineTo(0,ribbonH);
       ctx.lineTo(-ribbonW+18,ribbonH);
       ctx.closePath();
-      // gradient fill
       const g = ctx.createLinearGradient(w-ribbonW,0,w,0);
       g.addColorStop(0,'#ef4444'); g.addColorStop(1,'#f97316');
       ctx.fillStyle = g; ctx.fill();
-      // text
       ctx.fillStyle = '#fff'; ctx.font = '700 18px sans-serif'; ctx.textBaseline = 'middle';
       ctx.fillText(name.length>18?name.slice(0,15)+'...':name, -ribbonW+12, ribbonH/2);
       ctx.restore();
     }
 
-    // --- Initialize ---
+    // --- Init ---
     (function init(){
-      // set canvas drawing size (square) but visually responsive via CSS
       const size = 800;
       previewCanvas.width = size; previewCanvas.height = size;
-      // initial UI state
       nameSection.classList.add('hidden'); previewSection.classList.add('hidden');
+      loadLocalCount();
     })();
-
-    // --- Notes for Supabase integration (manual) ---
-    /*
-      Jika kamu ingin menyimpan "total dukungan" di Supabase:
-      1. set useSupabase = true
-      2. isi supabaseUrl & supabaseKey
-      3. buat table misal: twibbon_support (id serial, count int)
-      4. implementasikan fetchSupportCount() yang membaca row, dan incrementSupportCount() yang menambah count.
-      5. panggil fetchSupportCount() setelah render preview, dan panggil incrementSupportCount() saat tombol Dukung.
-
-      Karena contoh ini ditulis tanpa dependensi, saya memakai localStorage sebagai fallback sehingga fitur "Dukung (+1)" tetap berfungsi.
-    */
-
   </script>
 </body>
 </html>
