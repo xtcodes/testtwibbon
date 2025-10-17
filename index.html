@@ -39,6 +39,7 @@
       background: white;
       color: var(--muted);
       font-weight: 500;
+      user-select: none;
     }
     .tab.active {
       background: var(--accent);
@@ -109,7 +110,7 @@
       <button id="btnCopy" class="ghost">Copy</button>
       <button id="btnDownload" class="ghost">Download</button>
     </div>
-    <div class="output" id="output">Hasil format akan muncul di sini.</div>
+    <pre class="output" id="output">Hasil format akan muncul di sini.</pre>
   </div>
 
 <script>
@@ -120,101 +121,116 @@ const labelTitle = document.getElementById('labelTitle');
 const tabs = document.querySelectorAll('.tab');
 const storage = { html: '', css: '', js: '' };
 
-function indent(level, size = 2){ return ' '.repeat(level * size); }
+// ===== FORMATTER VS CODE STYLE (2 SPASI) =====
 
-function formatHTML(input){
-  input = input.trim();
-  const wrapper = document.createElement('div');
-  wrapper.innerHTML = input;
-  function dump(node, level){
-    const space = indent(level);
-    let out = '';
-    if (node.nodeType === Node.TEXT_NODE){
-      const text = node.nodeValue.replace(/\s+/g,' ').trim();
-      if(text) out += space + text + '\n';
-      return out;
+// --- HTML ---
+function formatHTML(input) {
+  const tab = '  ';
+  let indent = 0;
+  return input
+    .replace(/>\s+</g, '><')
+    .replace(/</g, '~::~<')
+    .split('~::~')
+    .map((line) => {
+      if (line.match(/^<\/\w/)) indent--;
+      const pad = tab.repeat(indent);
+      if (line.match(/^<\w[^>]*[^/]>/) && !line.includes('</')) indent++;
+      return pad + line.trim();
+    })
+    .join('\n')
+    .trim();
+}
+
+// --- CSS ---
+function formatCSS(input) {
+  const tab = '  ';
+  let indent = 0;
+  let formatted = '';
+  input = input.replace(/\s*([\{\};])\s*/g, '$1').replace(/\s+/g, ' ').trim();
+
+  for (let i = 0; i < input.length; i++) {
+    const ch = input[i];
+    if (ch === '{') {
+      formatted += ' {\n';
+      indent++;
+      formatted += tab.repeat(indent);
+    } else if (ch === '}') {
+      indent--;
+      formatted = formatted.trimEnd() + '\n' + tab.repeat(indent) + '}\n' + tab.repeat(indent);
+    } else if (ch === ';') {
+      formatted += ';\n' + tab.repeat(indent);
+    } else {
+      formatted += ch;
     }
-    if (node.nodeType !== Node.ELEMENT_NODE) return out;
-    const tag = node.tagName.toLowerCase();
-    let open = '<' + tag;
-    for(let a of node.attributes){ open += ' ' + a.name + '="' + a.value + '"'; }
-    open += '>';
-    const children = Array.from(node.childNodes).filter(n => !(n.nodeType===3 && !n.nodeValue.trim()));
-    if(children.length===0){ out += space + open.replace(/>$/,'/>') + '\n'; }
-    else {
-      out += space + open + '\n';
-      children.forEach(c => out += dump(c, level+1));
-      out += space + '</' + tag + '>\n';
+  }
+  return formatted.trim();
+}
+
+// --- JavaScript ---
+function formatJS(input) {
+  const tab = '  ';
+  let indent = 0;
+  let result = '';
+  input = input.replace(/\s+/g, ' ').replace(/\s*([\{\};])\s*/g, '$1').trim();
+
+  for (let i = 0; i < input.length; i++) {
+    const ch = input[i];
+    if (ch === '{') {
+      result += ' {\n';
+      indent++;
+      result += tab.repeat(indent);
+    } else if (ch === '}') {
+      indent--;
+      result = result.trimEnd() + '\n' + tab.repeat(indent) + '}\n' + tab.repeat(indent);
+    } else if (ch === ';') {
+      result += ';\n' + tab.repeat(indent);
+    } else {
+      result += ch;
     }
-    return out;
   }
-  let res = '';
-  wrapper.childNodes.forEach(n => res += dump(n,0));
-  return res.trim();
+  return result.trim();
 }
 
-function formatCSS(input, indentSize = 2){
-  const ind = (lvl)=>' '.repeat(lvl*indentSize);
-  let lvl=0, res='', buf='';
-  for(let ch of input){
-    buf += ch;
-    if(ch=='{'){res += buf.trim()+'\n';lvl++;buf=ind(lvl);}
-    else if(ch=='}'){lvl=Math.max(0,lvl-1);res=res.trimEnd()+'\n'+ind(lvl)+'}\n';buf=ind(lvl);}
-    else if(ch==';'){res+=buf.trim()+'\n'+ind(lvl);buf='';}
-  }
-  res += buf.trim();
-  return res.trim();
-}
-
-function formatJS(input, indentSize = 2){
-  let out='',lvl=0,inStr=false,strChar='';
-  for(let i=0;i<input.length;i++){
-    const ch=input[i];
-    if(!inStr && (ch==='"'||ch==="'"||ch==='`')){inStr=true;strChar=ch;out+=ch;continue;}
-    if(inStr){out+=ch;if(ch===strChar && input[i-1]!=='\\')inStr=false;continue;}
-    if(ch=='{'){lvl++;out+='{\n'+indent(lvl,indentSize);continue;}
-    if(ch=='}'){lvl=Math.max(0,lvl-1);out+='\n'+indent(lvl,indentSize)+'}';continue;}
-    if(ch==';'){out+=';\n'+indent(lvl,indentSize);continue;}
-    out+=ch;
-  }
-  return out.trim();
-}
-
-document.getElementById('btnFormat').onclick = ()=>{
+// === EVENT HANDLERS ===
+document.getElementById('btnFormat').onclick = () => {
   const val = inputArea.value;
-  if(!val.trim()){output.textContent='Tidak ada input.';return;}
+  if (!val.trim()) {
+    output.textContent = 'Tidak ada input.';
+    return;
+  }
   let formatted = val;
-  try{
-    if(currentTab==='html') formatted = formatHTML(val);
-    if(currentTab==='css') formatted = formatCSS(val);
-    if(currentTab==='js') formatted = formatJS(val);
-  }catch(e){ formatted = 'Error: '+e.message; }
+  try {
+    if (currentTab === 'html') formatted = formatHTML(val);
+    if (currentTab === 'css') formatted = formatCSS(val);
+    if (currentTab === 'js') formatted = formatJS(val);
+  } catch (e) {
+    formatted = 'Error: ' + e.message;
+  }
   storage[currentTab] = formatted;
-  inputArea.value = formatted;
-  output.textContent = formatted;
+  output.textContent = formatted; // hanya ubah preview, bukan textarea
 };
 
-document.getElementById('btnCopy').onclick = ()=>{
-  navigator.clipboard.writeText(inputArea.value).then(()=>alert('Disalin!'));
+document.getElementById('btnCopy').onclick = () => {
+  navigator.clipboard.writeText(output.textContent).then(() => alert('Hasil format disalin!'));
 };
 
-document.getElementById('btnDownload').onclick = ()=>{
-  const blob = new Blob([inputArea.value], {type:'text/plain'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download=`formatted.${currentTab}`;
+document.getElementById('btnDownload').onclick = () => {
+  const blob = new Blob([output.textContent], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `formatted.${currentTab}`;
   a.click();
   URL.revokeObjectURL(a.href);
 };
 
-tabs.forEach(tab=>{
-  tab.addEventListener('click', ()=>{
-    tabs.forEach(t=>t.classList.remove('active'));
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    tabs.forEach(t => t.classList.remove('active'));
     tab.classList.add('active');
     currentTab = tab.dataset.type;
     labelTitle.textContent = currentTab.toUpperCase();
-    inputArea.value = storage[currentTab] || '';
-    output.textContent = storage[currentTab] ? storage[currentTab] : 'Hasil format akan muncul di sini.';
+    inputArea.value = '';
+    output.textContent = 'Hasil format akan muncul di sini.';
   });
 });
 </script>
