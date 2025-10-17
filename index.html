@@ -2,101 +2,140 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Twibbon Upload Preview</title>
+<title>Twibbon Interaktif</title>
 <style>
-  body { font-family: Arial; padding: 2em; max-width: 700px; margin: auto; }
-  .preview { border: 1px solid #ccc; padding: 1em; margin-top: 1em; border-radius: 8px; text-align: center; }
-  img { max-width: 200px; display: block; margin: auto; }
-  .btn { padding: 0.5em 1em; margin-top: 0.5em; cursor: pointer; border-radius: 4px; border: none; background-color: #007bff; color: white; }
+  body { font-family: Arial; padding: 2em; max-width: 900px; margin: auto; }
+  h1 { text-align: center; }
+  #uploadSection { text-align: center; margin-bottom: 2em; }
+  input[type="file"] { margin-bottom: 1em; }
+  input[type="text"] { margin-bottom: 1em; width: 50%; padding: 0.5em; }
+  .preview, .twibbonList { margin-top: 2em; }
+  .previewCard, .twibbonCard { border: 1px solid #ccc; border-radius: 8px; padding: 1em; text-align: center; display: inline-block; margin: 1em; width: 200px; }
+  .previewCard img, .twibbonCard img { width: 150px; height: 150px; object-fit: contain; border-radius: 4px; }
+  .btn { padding: 0.5em 1em; cursor: pointer; border-radius: 4px; border: none; background-color: #007bff; color: white; margin-top: 0.5em; }
   .btn:hover { background-color: #0056b3; }
 </style>
 </head>
 <body>
 
-<h1>Upload Twibbon</h1>
+<h1>Twibbon Interaktif</h1>
 
-<!-- Step 1: Pilih file -->
-<input type="file" id="twibbonFile" accept="image/*" /><br/><br/>
-
-<!-- Step 2: Input nama -->
-<input type="text" id="twibbonName" placeholder="Nama Twibbon" /><br/><br/>
-
-<!-- Preview -->
-<div class="preview" id="preview" style="display:none;">
-  <img id="previewImage" src="" alt="Twibbon Preview" />
-  <div>Nama: <span id="previewName"></span></div>
-  <div>Tanggal Upload: <span id="previewDate"></span></div>
-  <div>Total Dukungan: <span id="previewSupport">0</span></div>
-  <button class="btn" id="uploadBtn">Unggah Twibbon</button>
+<div id="uploadSection">
+  <input type="file" id="twibbonFile" accept="image/*" /><br/>
+  <input type="text" id="twibbonName" placeholder="Nama Twibbon" /><br/>
+  <div id="previewContainer" class="preview" style="display:none;">
+    <div class="previewCard">
+      <img id="previewImage" src="" alt="Preview Twibbon" /><br/>
+      <input type="text" id="previewName" style="width: 90%; margin-top:0.5em;" /><br/>
+      <div>Tanggal Upload: <span id="previewDate"></span></div>
+      <div>Total Dukungan: <span id="previewSupport">0</span></div>
+      <button class="btn" id="uploadBtn">Unggah Twibbon</button>
+    </div>
+  </div>
 </div>
+
+<h2>Daftar Twibbon</h2>
+<div id="twibbonList" class="twibbonList"></div>
 
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-const supabaseUrl = 'https://cadezftkiksgpzooiyta.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhZGV6ZnRraWtzZ3B6b29peXRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAyMTk4NDcsImV4cCI6MjA3NTc5NTg0N30.oQYD2WzDSbxz_391K8YlznPfKkrINetiG2jVWYWFbb4';
+const supabaseUrl = 'YOUR_SUPABASE_URL';
+const supabaseKey = 'YOUR_SUPABASE_ANON_KEY';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 const twibbonFile = document.getElementById('twibbonFile');
-const twibbonName = document.getElementById('twibbonName');
-const preview = document.getElementById('preview');
+const twibbonNameInput = document.getElementById('twibbonName');
+const previewContainer = document.getElementById('previewContainer');
 const previewImage = document.getElementById('previewImage');
-const previewName = document.getElementById('previewName');
+const previewNameInput = document.getElementById('previewName');
 const previewDate = document.getElementById('previewDate');
 const previewSupport = document.getElementById('previewSupport');
 const uploadBtn = document.getElementById('uploadBtn');
+const twibbonList = document.getElementById('twibbonList');
 
 let selectedFile = null;
 
-// File dipilih → tampilkan preview
-twibbonFile.addEventListener('change', (e) => {
+// Fungsi untuk format tanggal
+function formatDateTime(date) {
+  const d = date.getDate().toString().padStart(2,'0');
+  const m = (date.getMonth()+1).toString().padStart(2,'0');
+  const y = date.getFullYear();
+  const h = date.getHours().toString().padStart(2,'0');
+  const min = date.getMinutes().toString().padStart(2,'0');
+  return `${d}/${m}/${y} ${h}:${min}`;
+}
+
+// Preview saat file dipilih
+twibbonFile.addEventListener('change', (e)=>{
   selectedFile = e.target.files[0];
-  if (!selectedFile) return;
+  if(!selectedFile) return;
   const reader = new FileReader();
-  reader.onload = () => {
+  reader.onload = ()=>{
     previewImage.src = reader.result;
-    preview.style.display = 'block';
-    updatePreviewInfo();
-  };
+    previewContainer.style.display = 'block';
+    const now = new Date();
+    previewDate.textContent = formatDateTime(now);
+    previewSupport.textContent = 0;
+    previewNameInput.value = twibbonNameInput.value.trim() || '';
+  }
   reader.readAsDataURL(selectedFile);
 });
 
-// Update info preview
-function updatePreviewInfo() {
-  previewName.textContent = twibbonName.value || '[Belum diisi]';
-  const now = new Date();
-  previewDate.textContent = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()} ${now.getHours()}:${now.getMinutes()}`;
-  previewSupport.textContent = 0;
-}
+// Sync nama input dengan preview
+twibbonNameInput.addEventListener('input', ()=>{
+  previewNameInput.value = twibbonNameInput.value.trim();
+});
 
-// Nama twibbon diubah → update preview
-twibbonName.addEventListener('input', updatePreviewInfo);
-
-// Upload Twibbon ke Supabase
-uploadBtn.addEventListener('click', async () => {
-  if (!selectedFile) return alert('Pilih file dulu!');
-  if (!twibbonName.value.trim()) return alert('Isi nama twibbon!');
-
+// Upload ke Supabase
+uploadBtn.addEventListener('click', async ()=>{
+  if(!selectedFile) return alert('Pilih file dulu!');
+  if(!previewNameInput.value.trim()) return alert('Isi nama Twibbon!');
   const filePath = `twibbons/${Date.now()}_${selectedFile.name}`;
   const { error: uploadError } = await supabase.storage.from('twibbons').upload(filePath, selectedFile);
-  if (uploadError) return alert('Gagal upload file: ' + uploadError.message);
-
+  if(uploadError) return alert('Gagal upload: '+uploadError.message);
   const { publicUrl } = supabase.storage.from('twibbons').getPublicUrl(filePath);
 
   const { error: insertError } = await supabase.from('twibbons').insert([
-    { 
-      name: twibbonName.value.trim(), 
-      file_url: publicUrl, 
-      support_count: 0 
-    }
+    { name: previewNameInput.value.trim(), file_url: publicUrl, support_count: 0 }
   ]);
-  if (insertError) return alert('Gagal simpan data: ' + insertError.message);
+  if(insertError) return alert('Gagal simpan metadata: '+insertError.message);
 
   alert('Twibbon berhasil diunggah!');
+  previewContainer.style.display = 'none';
   twibbonFile.value = '';
-  twibbonName.value = '';
-  preview.style.display = 'none';
+  twibbonNameInput.value = '';
+  selectedFile = null;
+  loadTwibbons();
 });
+
+// Load daftar Twibbon utama
+async function loadTwibbons() {
+  const { data, error } = await supabase.from('twibbons').select('*').order('created_at',{ascending:false});
+  if(error) return console.error(error);
+  twibbonList.innerHTML = '';
+  data.forEach(t=>{
+    const div = document.createElement('div');
+    div.className='twibbonCard';
+    div.innerHTML=`
+      <img src="${t.file_url}" alt="${t.name}" /><br/>
+      <strong>${t.name}</strong><br/>
+      Dukungan: <span id="support-${t.id}">${t.support_count}</span><br/>
+      <button class="btn" onclick="useTwibbon(${t.id})">Pakai Twibbon</button>
+    `;
+    twibbonList.appendChild(div);
+  });
+}
+
+// Fungsi global untuk pakai Twibbon & tambah dukungan
+window.useTwibbon = async (twibbonId)=>{
+  const { error } = await supabase.from('twibbons').update({ support_count: supabase.raw('support_count + 1') }).eq('id', twibbonId);
+  if(error) return console.error('Gagal update dukungan', error);
+  const span = document.getElementById(`support-${twibbonId}`);
+  if(span) span.textContent = parseInt(span.textContent)+1;
+}
+
+loadTwibbons();
 </script>
 </body>
 </html>
