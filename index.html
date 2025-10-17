@@ -3,328 +3,379 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Twibbon Hub - Buat, Galeri, & Pakai (Satu Halaman)</title>
+  <title>Twibbon — 3 Langkah (Sederhana)</title>
   <style>
-    :root{--max-width:980px}
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:20px;display:flex;justify-content:center}
-    .app{width:100%;max-width:var(--max-width)}
-    header{display:flex;align-items:center;justify-content:space-between}
+    :root{
+      --bg: #f3f3f3;
+      --card: #ffffff;
+      --accent: #60a5fa; /* biru muda */
+      --muted: #6b7280;
+      --radius: 12px;
+      --maxw: 920px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: var(--bg);
+      color:#0f172a;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding:28px 16px;
+      display:flex;
+      justify-content:center;
+    }
+    .wrap{width:100%;max-width:var(--maxw)}
+    header{display:flex;align-items:center;gap:12px;justify-content:space-between;margin-bottom:18px}
     h1{font-size:18px;margin:0}
-    nav{display:flex;gap:8px}
-    button.tab{padding:8px 12px;border-radius:8px;border:0;background:#e6eef6;cursor:pointer}
-    button.tab.active{background:#0ea5a4;color:white}
-    .card{background:white;border-radius:12px;padding:16px;margin-top:12px;box-shadow:0 6px 20px rgba(2,6,23,0.06)}
-
-    /* layout */
-    .columns{display:grid;grid-template-columns:1fr 360px;gap:12px}
-    @media (max-width:880px){.columns{grid-template-columns:1fr}}
-
-    .upload-area{border:2px dashed #d0d6df;border-radius:8px;padding:20px;text-align:center;cursor:pointer}
-    .upload-area.hover{background:#f1f7ff}
+    .subtitle{color:var(--muted);font-size:13px}
+    .card{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:0 6px 18px rgba(2,6,23,0.06)}
+    /* step layout */
+    .steps{display:grid;grid-template-columns:1fr;gap:12px}
+    .step{display:none}
+    .step.active{display:block}
+    .center{display:flex;align-items:center;justify-content:center}
+    /* upload area */
+    .upload-large{
+      border:2px dashed #dbeafe;
+      border-radius:10px;
+      padding:28px;
+      text-align:center;
+      background:linear-gradient(180deg, rgba(255,255,255,0.6), transparent);
+      cursor:pointer;
+    }
+    .upload-large.hover{background:#eef7ff}
+    .upload-large .icon{
+      width:60px;height:60px;border-radius:12px;background:#fff;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 4px 10px rgba(2,6,23,0.06);font-size:28px;color:var(--accent);
+    }
+    .upload-large p{margin:12px 0 6px;font-weight:600}
+    .upload-large .muted{font-size:13px;color:var(--muted)}
     input[type=file]{display:none}
-    .small{font-size:13px;color:#6b7280}
-    .controls{display:flex;gap:8px;margin-top:12px}
-    .controls button{flex:1;padding:10px;border-radius:8px;border:0;background:#0ea5a4;color:white;font-weight:600}
-    .secondary{background:#64748b}
-
-    .gallery-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-    @media (max-width:520px){.gallery-grid{grid-template-columns:repeat(1,1fr)}}
-    .tile{border-radius:10px;overflow:hidden;background:#f8fafc;position:relative;padding:8px}
-    .tile img{width:100%;height:140px;object-fit:cover;display:block}
-    .tile .meta{padding:8px;font-size:13px}
-    .tile .meta strong{display:block}
-
-    .editor-canvas{background:#0b1220;border-radius:8px;padding:12px;display:flex;align-items:center;justify-content:center}
-    canvas{width:100%;height:auto;border-radius:6px;max-width:100%}
-
-    .note{font-size:13px;color:#334155;margin-top:8px}
-    .muted{color:#64748b;font-size:13px}
+    /* controls */
+    .actions{display:flex;gap:8px;margin-top:12px}
+    button.primary{background:var(--accent);border:0;color:white;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600}
+    button.ghost{background:transparent;border:1px solid #e6edf8;color:var(--muted);padding:10px 12px;border-radius:10px;cursor:pointer}
+    button[disabled]{opacity:0.6;cursor:not-allowed}
+    /* preview small */
+    .preview-small{width:160px;height:160px;border-radius:8px;overflow:hidden;border:1px solid #e8eefc;background:repeating-conic-gradient(#f6f9ff 0% 25%, #eef4ff 0% 50%) 50% / 16px 16px;display:flex;align-items:center;justify-content:center}
+    .preview-small img{width:100%;height:100%;object-fit:contain;display:block}
+    /* form */
+    .field{margin-top:10px}
+    input[type=text]{width:100%;padding:10px;border-radius:10px;border:1px solid #e6eef8;font-size:14px}
+    /* gallery */
+    .gallery-grid{
+      margin-top:12px;
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));
+      gap:12px;
+    }
+    .card-item{
+      background:var(--card);border-radius:12px;padding:10px;text-align:center;border:1px solid rgba(2,6,23,0.04);
+      display:flex;flex-direction:column;gap:8px;align-items:center;
+    }
+    .card-item .thumb{width:100%;height:120px;border-radius:8px;overflow:hidden;background:repeating-conic-gradient(#f0f0f0 0% 25%, #e6e6e6 0% 50%) 50% / 20px 20px;display:flex;align-items:center;justify-content:center}
+    .card-item .thumb img{width:100%;height:100%;object-fit:contain;display:block}
+    .card-item .title{font-size:14px;font-weight:600;color:#0f172a;word-break:break-word}
+    .card-item .meta{font-size:12px;color:var(--muted)}
+    /* footer small note */
+    .note{font-size:13px;color:var(--muted);margin-top:10px;text-align:center}
+    @media (max-width:640px){ .preview-small{width:120px;height:120px} .card-item .thumb{height:100px} }
   </style>
 </head>
 <body>
-  <div class="app">
+  <div class="wrap">
     <header>
-      <h1>Twibbon Hub — Buat, Galeri, & Pakai</h1>
-      <nav>
-        <button class="tab active" data-view="create">Buat Twibbon</button>
-        <button class="tab" data-view="gallery">Galeri Twibbon</button>
-        <button class="tab" data-view="use">Pakai Twibbon</button>
-      </nav>
+      <div>
+        <h1>Twibbon — Buat & Bagikan (3 Langkah)</h1>
+        <div class="subtitle">Langkah demi langkah agar tidak membingungkan pengguna</div>
+      </div>
+      <div class="subtitle">Tema: abu muda</div>
     </header>
 
-    <div class="card" id="view-create">
-      <h2>Buat Twibbon</h2>
-      <p class="small">Unggah file twibbon (frame) — sebaiknya PNG dengan background transparan. Setelah disimpan, twibbon akan muncul di galeri dan bisa dipakai orang lain.</p>
-      <div style="display:flex;gap:12px;flex-wrap:wrap">
-        <div style="flex:1;min-width:260px">
-          <div id="frameDrop" class="upload-area" tabindex="0">
-            <input id="frameFile" type="file" accept="image/*" />
-            <div>
-              <strong id="frameDropText">Klik atau seret frame (PNG/JPG)</strong>
-              <div class="small">Rekomendasi: PNG 2000×2000 dengan area transparan.</div>
-            </div>
-          </div>
-
-          <div style="margin-top:10px">
-            <input id="frameName" placeholder="Nama Twibbon (contoh: Hari Guru 2025)" style="width:100%;padding:10px;border-radius:8px;border:1px solid #e6eef6" />
-            <div class="controls">
-              <button id="saveFrame">Simpan ke Galeri</button>
-              <button id="clearFrame" class="secondary">Batal</button>
-            </div>
-            <div class="note">Jika kamu punya Supabase, nyalakan integrasi di baris konfigurasi di bawah (dijelaskan di komentar).</div>
-          </div>
-        </div>
-        <div style="width:360px">
-          <div class="editor-canvas">
-            <canvas id="previewFrameCanvas" width="600" height="600"></canvas>
-          </div>
-          <div class="muted">Preview: tampilan frame sebelum disimpan ke galeri.</div>
-        </div>
+    <main class="card">
+      <!-- STEP INDICATOR -->
+      <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;flex-wrap:wrap">
+        <div id="step1Indicator" style="padding:8px 12px;border-radius:999px;background:var(--accent);color:#fff;font-weight:700">1. Upload</div>
+        <div id="step2Indicator" style="padding:8px 12px;border-radius:999px;background:#f1f5f9;color:var(--muted)">2. Nama & Simpan</div>
+        <div id="step3Indicator" style="padding:8px 12px;border-radius:999px;background:#f1f5f9;color:var(--muted)">3. Galeri</div>
       </div>
-    </div>
 
-    <div class="card hidden" id="view-gallery">
-      <h2>Galeri Twibbon</h2>
-      <p class="small">Daftar twibbon yang tersimpan di situs ini (di browser ini). Klik "Pakai" untuk memakai twibbon tersebut pada foto Anda.</p>
-      <div id="galleryGrid" class="gallery-grid"></div>
-      <div class="note">Catatan: saat Supabase belum aktif, galeri hanya tersimpan di browser kamu. Aktifkan Supabase agar twibbon dapat diakses semua orang.</div>
-    </div>
+      <div class="steps">
+        <!-- STEP 1 -->
+        <section id="step1" class="step active">
+          <div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap">
+            <div style="flex:1;min-width:220px">
+              <div id="dropArea" class="upload-large" tabindex="0">
+                <div class="icon">📁</div>
+                <p>Unggah Twibbon (frame)</p>
+                <div class="muted">Format: PNG dengan background transparan disarankan</div>
+                <div class="muted" style="margin-top:8px;font-size:13px">Klik atau seret file ke area ini</div>
+                <input id="fileInput" type="file" accept="image/*">
+              </div>
 
-    <div class="card hidden" id="view-use">
-      <h2>Pakai Twibbon</h2>
-      <p class="small">Pilih twibbon dari galeri (atau unggah frame langsung), lalu unggah foto Anda untuk menerapkan twibbon.</p>
-      <div class="columns">
-        <div>
-          <div style="display:flex;gap:8px;align-items:center">
-            <select id="selectTwibbon" style="flex:1;padding:8px;border-radius:8px;border:1px solid #e6eef6">
-              <option value="">-- Pilih Twibbon dari Galeri --</option>
-            </select>
-            <button id="refreshGallery" class="secondary" style="margin-left:8px;padding:8px 10px">Refresh</button>
-          </div>
+              <div class="field" style="display:flex;gap:8px;align-items:center">
+                <button id="toStep2" class="primary" disabled>Lanjut ke Langkah 2</button>
+                <button id="clearStep1" class="ghost">Bersihkan</button>
+              </div>
+            </div>
 
-          <div style="margin-top:10px" class="upload-area" id="photoDrop" tabindex="0">
-            <input id="photoFile" type="file" accept="image/*" />
-            <div>
-              <strong id="photoDropText">Klik atau seret foto Anda di sini</strong>
-              <div class="small">JPG/PNG, ideal 800×800 atau lebih besar.</div>
+            <div style="width:180px;text-align:center">
+              <div style="font-size:13px;font-weight:700;margin-bottom:8px">Preview</div>
+              <div class="preview-small" id="framePreview">
+                <div class="muted">Belum ada</div>
+              </div>
             </div>
           </div>
+        </section>
 
-          <div style="display:flex;gap:8px;margin-top:8px">
-            <button id="applyTwibbon">Terapkan Twibbon</button>
-            <button id="downloadResult" class="secondary">Unduh Hasil</button>
+        <!-- STEP 2 -->
+        <section id="step2" class="step">
+          <div style="display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap">
+            <div style="flex:1;min-width:260px">
+              <div style="font-weight:700;margin-bottom:6px">Beri Nama Twibbon</div>
+              <input id="twibbonName" type="text" placeholder="Contoh: Hari Guru 2025">
+              <div class="field" style="display:flex;gap:8px">
+                <button id="saveToGallery" class="primary">Simpan ke Galeri</button>
+                <button id="backTo1" class="ghost">Kembali</button>
+              </div>
+              <div class="note">Setelah disimpan, twibbon akan tampil di Galeri dan dapat dipakai orang lain.</div>
+            </div>
+
+            <div style="width:180px;text-align:center">
+              <div style="font-size:13px;font-weight:700;margin-bottom:8px">Preview</div>
+              <div class="preview-small" id="framePreview2">
+                <div class="muted">Belum ada</div>
+              </div>
+            </div>
           </div>
+        </section>
 
-          <div class="note">Setelah klik "Terapkan", preview muncul di kanan. Tombol unduh hanya untuk hasil akhir — twibbon aslinya tetap tersimpan di galeri.</div>
-        </div>
+        <!-- STEP 3 -->
+        <section id="step3" class="step">
+          <div>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+              <div style="font-weight:700">Galeri Twibbon</div>
+              <div style="display:flex;gap:8px;align-items:center">
+                <button id="addMore" class="primary">Tambah Twibbon</button>
+                <button id="refreshGal" class="ghost">Refresh</button>
+              </div>
+            </div>
 
-        <div>
-          <div class="editor-canvas">
-            <canvas id="resultCanvas" width="800" height="800"></canvas>
+            <div id="gallery" class="gallery-grid" style="margin-top:12px"></div>
+
+            <div class="note">Klik "Gunakan" untuk membuka editor: <code>editor.html?twibbon=&lt;id&gt;</code></div>
           </div>
-          <div class="muted" style="margin-top:6px">Preview hasil — gunakan tombol unduh untuk menyimpan gambar komposit ke perangkatmu.</div>
-        </div>
+        </section>
       </div>
-    </div>
-
+    </main>
   </div>
 
   <script>
-    // ========== Konfigurasi Supabase (opsional) ==========
-    // Jika kamu mau supaya galeri tersimpan di server sehingga semua user bisa mengaksesnya,
-    // isi SUPABASE_URL dan SUPABASE_ANON_KEY, lalu set useSupabase = true.
-    // Saya sudah menulis bagian integrasinya sebagai TODO — tinggal masukkan kredensial.
-    const useSupabase = false; // ubah ke true jika sudah konfigurasi
-    const SUPABASE_URL = '';
-    const SUPABASE_ANON_KEY = '';
+    // ---------- Simple 3-step Twibbon (localStorage) ----------
+    // Key for localStorage
+    const STORAGE_KEY = 'twibbon_hub_v3';
 
-    // ====================================================
+    // Elements
+    const step1 = document.getElementById('step1');
+    const step2 = document.getElementById('step2');
+    const step3 = document.getElementById('step3');
+    const step1Indicator = document.getElementById('step1Indicator');
+    const step2Indicator = document.getElementById('step2Indicator');
+    const step3Indicator = document.getElementById('step3Indicator');
 
-    // Elemen
-    const tabs = document.querySelectorAll('button.tab');
-    const views = {create: document.getElementById('view-create'), gallery: document.getElementById('view-gallery'), use: document.getElementById('view-use')};
+    const fileInput = document.getElementById('fileInput');
+    const dropArea = document.getElementById('dropArea');
+    const framePreview = document.getElementById('framePreview');
+    const framePreview2 = document.getElementById('framePreview2');
+    const toStep2Btn = document.getElementById('toStep2');
+    const clearStep1Btn = document.getElementById('clearStep1');
 
-    tabs.forEach(t => t.addEventListener('click', ()=>{
-      tabs.forEach(x=>x.classList.remove('active'));
-      t.classList.add('active');
-      const view = t.dataset.view;
-      Object.values(views).forEach(v=>v.classList.add('hidden'));
-      views[view].classList.remove('hidden');
-      if(view === 'gallery') renderGallery();
-      if(view === 'use') populateSelect();
-    }));
+    const twibbonNameInput = document.getElementById('twibbonName');
+    const saveToGalleryBtn = document.getElementById('saveToGallery');
+    const backTo1Btn = document.getElementById('backTo1');
 
-    // Storage fallback: localStorage (key)
-    const STORAGE_KEY = 'twibbon_hub_v1';
+    const galleryEl = document.getElementById('gallery');
+    const addMoreBtn = document.getElementById('addMore');
+    const refreshGalBtn = document.getElementById('refreshGal');
 
-    function loadTwibbons(){
+    // state
+    let currentFrameData = null; // dataURL
+    let currentFrameBlob = null;
+
+    // helpers
+    function showStep(n){
+      // 1,2,3
+      step1.classList.remove('active');
+      step2.classList.remove('active');
+      step3.classList.remove('active');
+      step1Indicator.style.background = '#f1f5f9'; step1Indicator.style.color = 'var(--muted)';
+      step2Indicator.style.background = '#f1f5f9'; step2Indicator.style.color = 'var(--muted)';
+      step3Indicator.style.background = '#f1f5f9'; step3Indicator.style.color = 'var(--muted)';
+      if(n===1){ step1.classList.add('active'); step1Indicator.style.background = getComputedStyle(document.documentElement).getPropertyValue('--accent'); step1Indicator.style.color = '#fff'; }
+      if(n===2){ step2.classList.add('active'); step2Indicator.style.background = getComputedStyle(document.documentElement).getPropertyValue('--accent'); step2Indicator.style.color = '#fff'; }
+      if(n===3){ step3.classList.add('active'); step3Indicator.style.background = getComputedStyle(document.documentElement).getPropertyValue('--accent'); step3Indicator.style.color = '#fff'; }
+    }
+
+    function uid(){ return 'tw-'+Date.now()+'-'+Math.random().toString(36).slice(2,8); }
+
+    function loadGallery(){
       try{
         const raw = localStorage.getItem(STORAGE_KEY);
         return raw ? JSON.parse(raw) : [];
-      }catch(e){ return []; }
+      }catch(e){
+        return [];
+      }
     }
-    function saveTwibbons(list){ localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); }
+    function saveGallery(list){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    }
 
-    // Utility: generate id
-    function uid(){ return 't'+Date.now()+'-'+Math.random().toString(36).slice(2,8); }
+    function renderThumb(container, dataURL){
+      container.innerHTML = '';
+      const img = document.createElement('img');
+      img.src = dataURL;
+      img.alt = 'frame';
+      img.onload = ()=>{}; // allow load
+      container.appendChild(img);
+    }
 
-    // ----------- Create Twibbon logic -----------
-    const frameDrop = document.getElementById('frameDrop');
-    const frameFile = document.getElementById('frameFile');
-    const frameName = document.getElementById('frameName');
-    const previewFrameCanvas = document.getElementById('previewFrameCanvas');
-    const ctxFrame = previewFrameCanvas.getContext('2d');
-    let currentFrameData = null; // dataURL
+    // ------- Drop & file handling robust -------
+    ;['dragenter','dragover'].forEach(ev => {
+      dropArea.addEventListener(ev, e => { e.preventDefault(); dropArea.classList.add('hover'); });
+    });
+    dropArea.addEventListener('dragleave', e => { dropArea.classList.remove('hover'); });
+    dropArea.addEventListener('drop', e => {
+      e.preventDefault();
+      dropArea.classList.remove('hover');
+      const f = e.dataTransfer.files && e.dataTransfer.files[0];
+      if(f) handleFile(f);
+    });
 
-    // drag/drop handlers
-    ;['dragover','dragenter'].forEach(ev => frameDrop.addEventListener(ev, e=>{ e.preventDefault(); frameDrop.classList.add('hover'); }));
-    frameDrop.addEventListener('dragleave', e=>{ frameDrop.classList.remove('hover'); });
-    frameDrop.addEventListener('drop', e=>{ e.preventDefault(); frameDrop.classList.remove('hover'); const f = e.dataTransfer.files[0]; handleFrameFile(f); });
-    frameDrop.addEventListener('click', ()=> frameFile.click());
-    frameFile.addEventListener('change', e=>{ if(e.target.files && e.target.files[0]) handleFrameFile(e.target.files[0]); frameFile.value = ''; });
+    dropArea.addEventListener('click', ()=> fileInput.click());
+    dropArea.addEventListener('keydown', e => { if(e.key === 'Enter' || e.key === ' ') fileInput.click(); });
 
-    function handleFrameFile(file){
+    fileInput.addEventListener('change', e => {
+      const f = e.target.files && e.target.files[0];
+      if(f) handleFile(f);
+      // clear so same file can be selected again later
+      fileInput.value = '';
+    });
+
+    function handleFile(file){
       if(!file) return;
-      if(!file.type.startsWith('image/')) return alert('Pilih file gambar.');
+      if(!file.type.startsWith('image/')) return alert('Pilih file gambar (PNG/JPG).');
       const reader = new FileReader();
       reader.onload = ev => {
-        const img = new Image();
-        img.onload = ()=>{
-          currentFrameData = ev.target.result;
-          // draw fit into preview canvas
-          const cw = previewFrameCanvas.width, ch = previewFrameCanvas.height;
-          ctxFrame.clearRect(0,0,cw,ch); ctxFrame.drawImage(img,0,0,cw,ch);
-        };
-        img.src = ev.target.result;
+        currentFrameData = ev.target.result;
+        renderThumb(framePreview, currentFrameData);
+        renderThumb(framePreview2, currentFrameData);
+        toStep2Btn.disabled = false;
       };
       reader.readAsDataURL(file);
     }
 
-    document.getElementById('saveFrame').addEventListener('click', ()=>{
-      const name = frameName.value.trim();
+    clearStep1Btn.addEventListener('click', ()=>{
+      currentFrameData = null;
+      framePreview.innerHTML = '<div class="muted">Belum ada</div>';
+      framePreview2.innerHTML = '<div class="muted">Belum ada</div>';
+      toStep2Btn.disabled = true;
+      twibbonNameInput.value = '';
+    });
+
+    // navigate
+    toStep2Btn.addEventListener('click', ()=>{
       if(!currentFrameData) return alert('Unggah frame terlebih dahulu.');
+      showStep(2);
+    });
+    backTo1Btn.addEventListener('click', ()=> showStep(1));
+
+    // Save to gallery
+    saveToGalleryBtn.addEventListener('click', ()=>{
+      const name = (twibbonNameInput.value || '').trim();
       if(!name) return alert('Isi nama twibbon.');
-      const list = loadTwibbons();
-      const item = { id: uid(), name, data: currentFrameData, created_at: new Date().toISOString() };
+      if(!currentFrameData) return alert('Tidak ada frame untuk disimpan.');
+
+      const list = loadGallery();
+      const item = {
+        id: uid(),
+        name,
+        data: currentFrameData,
+        created_at: new Date().toISOString()
+      };
       list.unshift(item);
-      saveTwibbons(list);
-      frameName.value = '';
-      currentFrameData = null; ctxFrame.clearRect(0,0,previewFrameCanvas.width,previewFrameCanvas.height);
-      alert('Twibbon tersimpan ke galeri (lokal). Jika ingin agar semua orang dapat mengakses, aktifkan Supabase di konfigurasi.');
+      saveGallery(list);
+
+      // reset step1/2 state for next upload
+      currentFrameData = null;
+      twibbonNameInput.value = '';
+      framePreview.innerHTML = '<div class="muted">Belum ada</div>';
+      framePreview2.innerHTML = '<div class="muted">Belum ada</div>';
+      toStep2Btn.disabled = true;
+
+      // go to gallery step
+      showStep(3);
       renderGallery();
+      alert('Twibbon tersimpan ke galeri lokal. Jika mau agar semua orang dapat mengakses, integrasikan ke Supabase.');
     });
-    document.getElementById('clearFrame').addEventListener('click', ()=>{ currentFrameData=null; ctxFrame.clearRect(0,0,previewFrameCanvas.width,previewFrameCanvas.height); frameName.value=''; });
 
-    // ----------- Gallery rendering -----------
-    const galleryGrid = document.getElementById('galleryGrid');
+    // gallery
     function renderGallery(){
-      const list = loadTwibbons();
-      galleryGrid.innerHTML = '';
-      if(list.length===0){ galleryGrid.innerHTML = '<div class="muted">Belum ada twibbon. Buat terlebih dahulu di tab "Buat Twibbon".</div>'; return; }
-      list.forEach(it => {
-        const tile = document.createElement('div'); tile.className='tile';
+      const list = loadGallery();
+      galleryEl.innerHTML = '';
+      if(list.length === 0){
+        galleryEl.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted)">Belum ada twibbon. Buat twibbon dulu di langkah 1.</div>';
+        return;
+      }
+      for(const it of list){
+        const card = document.createElement('div');
+        card.className = 'card-item';
+        const thumb = document.createElement('div'); thumb.className = 'thumb';
         const img = document.createElement('img'); img.src = it.data; img.alt = it.name;
-        const meta = document.createElement('div'); meta.className='meta';
-        meta.innerHTML = `<strong>${escapeHtml(it.name)}</strong><div class="muted">${new Date(it.created_at).toLocaleString()}</div>`;
-        const btns = document.createElement('div'); btns.style.display='flex'; btns.style.gap='6px'; btns.style.marginTop='6px';
-        const useBtn = document.createElement('button'); useBtn.textContent='Pakai'; useBtn.style.flex='1'; useBtn.addEventListener('click', ()=>{ goToUseModeWith(it.id); });
-        const delBtn = document.createElement('button'); delBtn.textContent='Hapus'; delBtn.className='secondary'; delBtn.style.flex='1'; delBtn.addEventListener('click', ()=>{ if(confirm('Hapus twibbon ini dari galeri?')){ deleteTwibbon(it.id); } });
-        btns.appendChild(useBtn); btns.appendChild(delBtn);
-        tile.appendChild(img); tile.appendChild(meta); tile.appendChild(btns);
-        galleryGrid.appendChild(tile);
-      });
+        thumb.appendChild(img);
+
+        const title = document.createElement('div'); title.className = 'title'; title.textContent = it.name;
+        const meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = new Date(it.created_at).toLocaleString();
+
+        const btnWrap = document.createElement('div'); btnWrap.style.display = 'flex'; btnWrap.style.gap = '8px'; btnWrap.style.width='100%';
+        const useBtn = document.createElement('button'); useBtn.className='primary'; useBtn.style.flex='1'; useBtn.textContent='Gunakan';
+        useBtn.addEventListener('click', ()=> {
+          // open editor page with twibbon id
+          window.location.href = `editor.html?twibbon=${encodeURIComponent(it.id)}`;
+        });
+        const delBtn = document.createElement('button'); delBtn.className='ghost'; delBtn.style.flex='1'; delBtn.textContent='Hapus';
+        delBtn.addEventListener('click', ()=>{
+          if(!confirm('Hapus twibbon ini dari galeri?')) return;
+          const filtered = loadGallery().filter(x=>x.id !== it.id);
+          saveGallery(filtered);
+          renderGallery();
+        });
+
+        btnWrap.appendChild(useBtn); btnWrap.appendChild(delBtn);
+
+        card.appendChild(thumb);
+        card.appendChild(title);
+        card.appendChild(meta);
+        card.appendChild(btnWrap);
+
+        galleryEl.appendChild(card);
+      }
     }
 
-    function deleteTwibbon(id){ const list = loadTwibbons().filter(x=>x.id!==id); saveTwibbons(list); renderGallery(); populateSelect(); }
+    addMoreBtn.addEventListener('click', ()=> showStep(1));
+    refreshGalBtn.addEventListener('click', renderGallery);
 
-    function goToUseModeWith(id){ // switch to use tab and select
-      document.querySelector('button.tab[data-view="use"]').click();
-      setTimeout(()=>{ const sel = document.getElementById('selectTwibbon'); sel.value = id; }, 80);
-    }
-
-    // ----------- Use Twibbon logic -----------
-    const selectTwibbon = document.getElementById('selectTwibbon');
-    const refreshGalleryBtn = document.getElementById('refreshGallery');
-    const photoDrop = document.getElementById('photoDrop');
-    const photoFile = document.getElementById('photoFile');
-    const resultCanvas = document.getElementById('resultCanvas');
-    const ctxResult = resultCanvas.getContext('2d');
-    let selectedFrame = null; // object
-    let loadedPhoto = null;
-
-    function populateSelect(){
-      const list = loadTwibbons();
-      selectTwibbon.innerHTML = '<option value="">-- Pilih Twibbon dari Galeri --</option>';
-      list.forEach(it => {
-        const o = document.createElement('option'); o.value = it.id; o.textContent = it.name; selectTwibbon.appendChild(o);
-      });
-    }
-    refreshGalleryBtn.addEventListener('click', ()=> populateSelect());
-
-    selectTwibbon.addEventListener('change', ()=>{
-      const id = selectTwibbon.value;
-      const list = loadTwibbons(); selectedFrame = list.find(x=>x.id===id) || null;
-      // preview frame on canvas if no photo yet
-      drawResultPreview();
-    });
-
-    ;['dragover','dragenter'].forEach(ev => photoDrop.addEventListener(ev, e=>{ e.preventDefault(); photoDrop.classList.add('hover'); }));
-    photoDrop.addEventListener('dragleave', e=> photoDrop.classList.remove('hover'));
-    photoDrop.addEventListener('drop', e=>{ e.preventDefault(); photoDrop.classList.remove('hover'); const f = e.dataTransfer.files[0]; handlePhotoFile(f); });
-    photoDrop.addEventListener('click', ()=> photoFile.click());
-    photoFile.addEventListener('change', e=>{ if(e.target.files && e.target.files[0]) handlePhotoFile(e.target.files[0]); photoFile.value=''; });
-
-    function handlePhotoFile(file){ if(!file) return; if(!file.type.startsWith('image/')) return alert('Pilih file gambar.'); const reader = new FileReader(); reader.onload = ev=>{ const img = new Image(); img.onload = ()=>{ loadedPhoto = img; drawResultPreview(); }; img.src = ev.target.result; }; reader.readAsDataURL(file); }
-
-    document.getElementById('applyTwibbon').addEventListener('click', ()=>{
-      if(!selectedFrame) return alert('Pilih twibbon dulu.');
-      if(!loadedPhoto) return alert('Unggah foto Anda dulu.');
-      composeResult();
-    });
-
-    document.getElementById('downloadResult').addEventListener('click', ()=>{
-      const a = document.createElement('a'); a.href = resultCanvas.toDataURL('image/png'); a.download = 'hasil_twibbon.png'; a.click();
-    });
-
-    function drawResultPreview(){
-      const w = resultCanvas.width, h = resultCanvas.height;
-      ctxResult.clearRect(0,0,w,h);
-      // if photo exists, draw scaled cover
-      if(loadedPhoto){ drawCover(ctxResult, loadedPhoto, w, h); }
-      // if frame selected, draw it semi-transparent (frame image may have transparency)
-      if(selectedFrame){ const img = new Image(); img.onload = ()=>{ ctxResult.drawImage(img,0,0,w,h); }; img.src = selectedFrame.data; }
-    }
-
-    function composeResult(){ // produce final composited image with frame
-      drawResultPreview();
-      alert('Hasil sudah ditampilkan. Gunakan tombol Unduh Hasil untuk menyimpan ke perangkat.');
-    }
-
-    function drawCover(ctx, img, w, h){ const iw = img.width, ih = img.height; const scale = Math.max(w/iw, h/ih); const nw = iw*scale, nh = ih*scale; const dx = (w-nw)/2, dy = (h-nh)/2; ctx.drawImage(img, dx, dy, nw, nh); }
-
-    // ----------- Helpers -----------
-    function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]||c)); }
-
-    // Initialize UI
+    // init
     (function init(){
-      renderGallery(); populateSelect();
-      // ensure canvases have sensible drawing size
-      previewFrameCanvas.width = 600; previewFrameCanvas.height = 600;
-      resultCanvas.width = 800; resultCanvas.height = 800;
+      showStep(1);
+      framePreview.innerHTML = '<div class="muted">Belum ada</div>';
+      framePreview2.innerHTML = '<div class="muted">Belum ada</div>';
+      renderGallery();
     })();
 
-    // ========== Supabase integration notes (for later) ==========
-    /*
-      Untuk menyimpan ke server agar semua user bisa mengakses:
-      1) Buat project Supabase, aktifkan Storage bucket (misal 'twibbons'), dan buat public policy.
-      2) Buat tabel 'twibbons' dengan kolom: id (text PK), name (text), path (text), created_at (timestamp), owner (text)
-      3) Di config di atas, isi SUPABASE_URL & SUPABASE_ANON_KEY dan set useSupabase = true.
-      4) Implementasikan upload: unggah file ke storage (supabase.storage.from('twibbons').upload(path, file)) dan simpan metadata ke tabel.
-      5) Ganti loadTwibbons/saveTwibbons untuk menggunakan API Supabase (fetch) dan panggil render.
-
-      Karena sekarang kamu pilih 1 file HTML sederhana, saya sediakan fallback localStorage supaya fungsi dasar langsung jalan. Kalau mau, nanti saya tambahkan versi lengkap integrasi Supabase (akan butuh credentials dan sedikit server rules).
-    */
-
+    // Note: jika nanti ingin integrasi Supabase:
+    // - simpan file ke Supabase Storage dan metadata (id, name, path) ke tabel 'twibbons'
+    // - ganti loadGallery()/saveGallery() untuk memakai Supabase API
+    // - nanti saya bantu tulis kode Supabase-nya jika kamu mau
   </script>
 </body>
 </html>
