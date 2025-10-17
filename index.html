@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Twibbon Upload Preview</title>
+<style>
+  body { font-family: Arial; padding: 2em; max-width: 700px; margin: auto; }
+  .preview { border: 1px solid #ccc; padding: 1em; margin-top: 1em; border-radius: 8px; text-align: center; }
+  img { max-width: 200px; display: block; margin: auto; }
+  .btn { padding: 0.5em 1em; margin-top: 0.5em; cursor: pointer; border-radius: 4px; border: none; background-color: #007bff; color: white; }
+  .btn:hover { background-color: #0056b3; }
+</style>
+</head>
+<body>
+
+<h1>Upload Twibbon</h1>
+
+<!-- Step 1: Pilih file -->
+<input type="file" id="twibbonFile" accept="image/*" /><br/><br/>
+
+<!-- Step 2: Input nama -->
+<input type="text" id="twibbonName" placeholder="Nama Twibbon" /><br/><br/>
+
+<!-- Preview -->
+<div class="preview" id="preview" style="display:none;">
+  <img id="previewImage" src="" alt="Twibbon Preview" />
+  <div>Nama: <span id="previewName"></span></div>
+  <div>Tanggal Upload: <span id="previewDate"></span></div>
+  <div>Total Dukungan: <span id="previewSupport">0</span></div>
+  <button class="btn" id="uploadBtn">Unggah Twibbon</button>
+</div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+const supabaseUrl = 'https://cadezftkiksgpzooiyta.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhZGV6ZnRraWtzZ3B6b29peXRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAyMTk4NDcsImV4cCI6MjA3NTc5NTg0N30.oQYD2WzDSbxz_391K8YlznPfKkrINetiG2jVWYWFbb4';
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+const twibbonFile = document.getElementById('twibbonFile');
+const twibbonName = document.getElementById('twibbonName');
+const preview = document.getElementById('preview');
+const previewImage = document.getElementById('previewImage');
+const previewName = document.getElementById('previewName');
+const previewDate = document.getElementById('previewDate');
+const previewSupport = document.getElementById('previewSupport');
+const uploadBtn = document.getElementById('uploadBtn');
+
+let selectedFile = null;
+
+// File dipilih → tampilkan preview
+twibbonFile.addEventListener('change', (e) => {
+  selectedFile = e.target.files[0];
+  if (!selectedFile) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    previewImage.src = reader.result;
+    preview.style.display = 'block';
+    updatePreviewInfo();
+  };
+  reader.readAsDataURL(selectedFile);
+});
+
+// Update info preview
+function updatePreviewInfo() {
+  previewName.textContent = twibbonName.value || '[Belum diisi]';
+  const now = new Date();
+  previewDate.textContent = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()} ${now.getHours()}:${now.getMinutes()}`;
+  previewSupport.textContent = 0;
+}
+
+// Nama twibbon diubah → update preview
+twibbonName.addEventListener('input', updatePreviewInfo);
+
+// Upload Twibbon ke Supabase
+uploadBtn.addEventListener('click', async () => {
+  if (!selectedFile) return alert('Pilih file dulu!');
+  if (!twibbonName.value.trim()) return alert('Isi nama twibbon!');
+
+  const filePath = `twibbons/${Date.now()}_${selectedFile.name}`;
+  const { error: uploadError } = await supabase.storage.from('twibbons').upload(filePath, selectedFile);
+  if (uploadError) return alert('Gagal upload file: ' + uploadError.message);
+
+  const { publicUrl } = supabase.storage.from('twibbons').getPublicUrl(filePath);
+
+  const { error: insertError } = await supabase.from('twibbons').insert([
+    { 
+      name: twibbonName.value.trim(), 
+      file_url: publicUrl, 
+      support_count: 0 
+    }
+  ]);
+  if (insertError) return alert('Gagal simpan data: ' + insertError.message);
+
+  alert('Twibbon berhasil diunggah!');
+  twibbonFile.value = '';
+  twibbonName.value = '';
+  preview.style.display = 'none';
+});
+</script>
+</body>
+</html>
