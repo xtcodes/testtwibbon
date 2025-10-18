@@ -12,9 +12,9 @@
         min-height: 100vh;
         display: flex;
         justify-content: center;
-        align-items: center; /* Pusat vertikal dan horizontal */
+        align-items: center; 
         flex-direction: column;
-        background-color: #f4f7f9; /* Abu Muda Polos */
+        background-color: #f4f7f9; 
         color: #1f2937;
         padding: 20px;
     }
@@ -24,64 +24,66 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        max-width: 90%; /* Responsif */
+        max-width: 90%;
     }
     
-    /* 3. Area Pratinjau Foto dengan Spinner */
+    /* 3. Area Pratinjau Foto dengan Spinner (Menggunakan Flexbox untuk Centering) */
     #preview-wrapper {
         position: relative;
-        width: 250px;
+        /* Ukuran wrapper yang menentukan batas luar spinner */
+        width: 250px; 
         height: 250px;
         margin-bottom: 30px;
-        /* Tambahkan centering di sini untuk memastikan wrapper rapi */
-        display: flex;
+        
+        /* FIX: Menggunakan Flexbox untuk memusatkan semua konten anak */
+        display: flex; 
         justify-content: center;
         align-items: center;
     }
 
     #preview-container {
-        /* Ukuran container lebih kecil dari wrapper untuk memberi ruang pada spinner */
+        /* Ukuran container foto yang lebih kecil */
         width: 200px; 
         height: 200px;
         border-radius: 50%; 
         overflow: hidden;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); 
         background-color: #ffffff;
-        position: relative; /* Penting untuk centering gambar di dalamnya */
+        position: relative; 
         z-index: 2; /* Di atas spinner */
     }
 
     #user-photo {
-        /* Membuat gambar selalu memenuhi container dan terpotong di tengah */
+        /* object-fit: cover memastikan centering gambar di dalamnya */
         width: 100%;
         height: 100%;
-        object-fit: cover; /* Solusi responsif untuk cropping dan centering */
+        object-fit: cover; 
     }
     
-    /* 4. Spinner Layer 1: Bingkai Statis (Warna Kontras) */
+    /* 4. Spinner Layer 1: Bingkai Statis */
     .spinner-frame {
         position: absolute;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        border: 10px solid #cbd5e1; /* Warna bingkai abu-abu muda/statis */
+        border: 10px solid #cbd5e1; 
         border-radius: 50%;
         z-index: 1;
     }
 
-    /* 5. Spinner Layer 2: Lingkaran Berputar (Warna Aksi) */
+    /* 5. Spinner Layer 2: Lingkaran Berputar */
     .spinner-outer {
         position: absolute;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        border: 10px solid transparent; /* Transparan agar tidak menutupi frame */
-        border-top: 10px solid #10b981; /* Hijau modern penuh */
+        border: 10px solid transparent; 
+        border-top: 10px solid #10b981; 
         border-radius: 50%;
         animation: spin 1.5s linear infinite;
-        z-index: 3; /* Di atas frame, di bawah foto */
+        z-index: 3;
     }
     
     @keyframes spin {
@@ -108,7 +110,7 @@
         color: #4b5563;
         text-align: center;
     }
-        </style>
+</style>
 </head>
 <body>
 
