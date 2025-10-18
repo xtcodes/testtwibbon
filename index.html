@@ -73,7 +73,7 @@ textarea {
   background: white;
   color: #222;
   border: none;
-  resize: vertical;
+  resize: none; /* Mengubah ini agar tidak bisa resize */
   outline: none;
   padding: 8px 10px;
   font-size: 14px;
@@ -92,6 +92,7 @@ button {
   font-size: 14px;
   margin: 10px;
   align-self: flex-start;
+  transition: background 0.2s;
 }
 button:hover {
   background: #0a6ec5;
@@ -126,28 +127,58 @@ const btnFormat = document.getElementById("btnFormat");
 const tabs = document.querySelectorAll(".tab");
 const storage = { html: "", css: "", js: "" };
 
+// --- FUNGSI UTAMA ---
+
 function updateLineNumbers() {
-  const totalLines = (codeInput.value === "") ? 1 : codeInput.value.split("\n").length;
+  const totalLines = (codeInput.value.trim() === "") ? 1 : codeInput.value.split("\n").length;
   lines.textContent = Array.from({length: totalLines}, (_, i) => i + 1).join("\n");
+  lines.scrollTop = codeInput.scrollTop; // Sinkronkan scroll
 }
+
 codeInput.addEventListener("input", updateLineNumbers);
-codeInput.addEventListener("scroll", () => lines.scrollTop = codeInput.scrollTop);
+codeInput.addEventListener("scroll", updateLineNumbers); // Gunakan fungsi yang sama
 updateLineNumbers();
 
 tabs.forEach(tab => {
   tab.addEventListener("click", () => {
     tabs.forEach(t => t.classList.remove("active"));
     tab.classList.add("active");
+    // Simpan konten tab lama sebelum berpindah
     storage[currentTab] = codeInput.value;
     currentTab = tab.dataset.type;
+    // Muat konten tab baru
     codeInput.value = storage[currentTab];
     updateLineNumbers();
+    // Atur placeholder sesuai tab
+    const placeholder = currentTab === 'html' ? '' :
+                        currentTab === 'css' ? '/* Tulis kode CSS di sini... */' :
+                        '// Tulis kode JavaScript di sini...';
+    codeInput.setAttribute('placeholder', placeholder);
   });
 });
 
 btnFormat.addEventListener("click", () => {
   let val = codeInput.value.trim();
-  if (!val) return;
+  if (!val) {
+    alert("Masukkan kode terlebih dahulu!");
+    return;
+  }
+
+  // --- VALIDASI SEBELUM FORMAT ---
+  let isValid = true;
+  if (currentTab === "html" && !isValidHTML(val)) {
+    alert("Kode yang dimasukkan sepertinya bukan HTML yang valid. Periksa kembali tag dan strukturnya!");
+    isValid = false;
+  } else if (currentTab === "css" && !isValidCSS(val)) {
+    alert("Kode yang dimasukkan sepertinya bukan CSS yang valid. Pastikan ada kurung kurawal ({}) dan titik koma (;)");
+    isValid = false;
+  } else if (currentTab === "js" && !isValidJS(val)) {
+    alert("Kode yang dimasukkan sepertinya bukan JavaScript yang valid. Periksa tanda kurung, kurawal, dan sintaks lainnya.");
+    isValid = false;
+  }
+
+  if (!isValid) return;
+  // --- END VALIDASI ---
 
   let formatted = val;
   if (currentTab === "html") formatted = formatHTML(val);
@@ -158,57 +189,135 @@ btnFormat.addEventListener("click", () => {
   updateLineNumbers();
 });
 
-// === FIXED HTML FORMATTER ===
+// --- FUNGSI VALIDASI SEDERHANA ---
+
+// HTML: Harus memiliki setidaknya satu tag pembuka dan penutup (misal: <div>)
+function isValidHTML(code) {
+  // Mencari minimal satu tag HTML yang valid (misal: <a>, <p>, <div>, <h1>, dll)
+  return /<[a-z][\s\S]*>/.test(code.toLowerCase());
+}
+
+// CSS: Harus memiliki setidaknya satu properti dan nilai di dalam kurung kurawal
+function isValidCSS(code) {
+  // Mencari selector, kurung kurawal, dan properti:nilai;
+  return /^[^{]*\{[^}]*\:.*\;.*\}/ms.test(code.trim());
+}
+
+// JavaScript: Harus memiliki minimal satu keyword JS atau tanda kurung/titik koma (contoh sederhana)
+function isValidJS(code) {
+  // Mencari statement JS dasar seperti function, const, let, var, if, for, ;, atau ()
+  const keywords = ['function', 'const', 'let', 'var', 'if', 'for', 'return'];
+  const hasKeyword = keywords.some(keyword => new RegExp(`\\b${keyword}\\b`).test(code));
+  const hasSyntax = /[\{\}\(\);]/.test(code);
+  return hasKeyword || hasSyntax;
+}
+
+// --- FUNGSI FORMATTER YANG DITINGKATKAN (Beautify Sederhana) ---
+
+// HTML Formatter yang lebih kuat
 function formatHTML(html) {
-  html = html.replace(/>\s+</g, '><').trim();
-  const lines = html.split(/(?=<)|(?<=>)/g).filter(Boolean);
+  // Menghapus spasi ekstra di antara tag, kecuali di dalam komentar atau tag pre/code
+  html = html.replace(/(>)\s*(<)([^!])/g, '$1\n$2$3');
+  html = html.replace(/()/g, '\n$1\n'); // pisahkan komentar
+
+  const lines = html.split('\n').filter(line => line.trim() !== '');
   let formatted = "", indent = 0;
+  // Tag yang tidak memerlukan penutup/tidak menambah indentasi (void tags)
   const voidTags = ["area","base","br","col","embed","hr","img","input","link","meta","param","source","track","wbr"];
 
   for (let i = 0; i < lines.length; i++) {
     let line = lines[i].trim();
-    if (!line) continue;
 
-    // closing tag
-    if (/^<\/[^>]+>/.test(line)) indent--;
-
-    formatted += "  ".repeat(indent) + line + "\n";
-
-    // opening tag but not void/self-closing
-    if (/^<[^/!][^>]*[^/]?>/.test(line)) {
-      const tag = line.match(/^<(\w+)/);
-      if (tag && !voidTags.includes(tag[1])) indent++;
+    // 1. Tag Penutup (e.g., </div>)
+    if (/^<\/[^>]+>/.test(line)) {
+      indent = Math.max(0, indent - 1); // Kurangi indentasi
+      formatted += "  ".repeat(indent) + line + "\n";
+    }
+    // 2. Komentar, Doctype, atau Tag Mandiri (e.g., <br>)
+    else if (/^<!/.test(line) || /^<br/.test(line) || /^<hr/.test(line) || /^<img/.test(line) || /^<input/.test(line) || /^<meta/.test(line) || /^\/\//.test(line)) {
+      formatted += "  ".repeat(indent) + line + "\n";
+    }
+    // 3. Tag Pembuka (e.g., <div>)
+    else if (/^<[^/!][^>]*[^/]?>/.test(line)) {
+      formatted += "  ".repeat(indent) + line + "\n";
+      const tagMatch = line.match(/^<(\w+)/);
+      if (tagMatch && !voidTags.includes(tagMatch[1].toLowerCase())) {
+        // Tag yang memerlukan penutup (non-void tag)
+        indent++;
+      }
+    }
+    // 4. Teks biasa di antara tag (dibiarkan apa adanya di level indentasi saat ini)
+    else {
+      formatted += "  ".repeat(indent) + line + "\n";
     }
   }
   return formatted.trim();
 }
 
-// === CSS SIMPLE FORMAT ===
+// CSS Formatter (Ditingkatkan sedikit dari aslinya)
 function formatCSS(css) {
-  css = css.replace(/\s*([\{\};:])\s*/g, '$1').trim();
+  // Membersihkan spasi di sekitar karakter khusus
+  css = css.replace(/\s*([\{\};:,])\s*/g, '$1').trim();
+
   let indent = 0, out = '';
   for (let ch of css) {
-    if (ch === '{') { out += ' {\n' + '  '.repeat(++indent); }
-    else if (ch === '}') { indent--; out += '\n' + '  '.repeat(indent) + '}\n'; }
-    else if (ch === ';') { out += ';\n' + '  '.repeat(indent); }
-    else out += ch;
+    if (ch === '{') {
+      out += ' {\n' + '  '.repeat(++indent);
+    } else if (ch === '}') {
+      indent--;
+      out += '\n' + '  '.repeat(indent) + '}\n';
+    } else if (ch === ';') {
+      out += ';\n' + '  '.repeat(indent);
+    } else if (ch === ',') { // Untuk multiple selector
+        out += ', ';
+    } else if (ch === ':') {
+        out += ': '; // Tambahkan spasi setelah titik dua (properti: nilai)
+    } else {
+      out += ch;
+    }
   }
-  return out.trim();
+  // Menghapus baris kosong ekstra yang mungkin muncul dari \n di akhir
+  return out.replace(/(\n\s*){2,}/g, '\n\n').trim();
 }
 
-// === JS SIMPLE FORMAT ===
+
+// JS Formatter (Ditingkatkan, mengurus statement baru)
 function formatJS(js) {
+  // Membersihkan spasi berlebihan
   js = js.replace(/\s+/g, ' ').trim();
+
   let indent = 0, out = '';
-  for (let ch of js) {
-    if (ch === '{') { out += ' {\n' + '  '.repeat(++indent); }
-    else if (ch === '}') { indent--; out += '\n' + '  '.repeat(indent) + '}\n'; }
-    else if (ch === ';') { out += ';\n' + '  '.repeat(indent); }
-    else out += ch;
+  // Tambahkan spasi sebelum dan sesudah kurung kurawal untuk pemisahan
+  js = js.replace(/([\{\}])/g, ' $1 ').trim();
+  // Tambahkan spasi setelah titik koma dan sebelum baris baru
+  js = js.replace(/;/g, '; ');
+
+  // Bagi berdasarkan spasi, dan gabungkan lagi dengan aturan indentasi
+  const tokens = js.split(/\s+/).filter(Boolean);
+
+  for (const token of tokens) {
+    if (token === '{') {
+      out += ' ' + token + '\n' + '  '.repeat(++indent);
+    } else if (token === '}') {
+      indent = Math.max(0, indent - 1);
+      out = out.trimEnd() + '\n' + '  '.repeat(indent) + token + '\n' + '  '.repeat(indent);
+    } else if (token === ';') {
+      out += token + '\n' + '  '.repeat(indent);
+    } else {
+      // Tambahkan spasi jika bukan awal baris dan token sebelumnya bukan ; atau { atau }
+      if (out.endsWith('\n' + '  '.repeat(indent))) {
+        out += token;
+      } else {
+        out += ' ' + token;
+      }
+    }
   }
-  return out.trim();
+
+  // Bersihkan spasi berlebihan dan indentasi di awal
+  return out.trim().replace(/(\n\s*){2,}/g, '\n\n');
 }
+
 </script>
 
 </body>
-</html>
+      </html>
