@@ -5,14 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Result</title>
 <style>
-body, html { margin:0; padding:0; font-family:Arial, sans-serif; background:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; }
-#canvas { width: 100%; border-radius:50%; }
+body, html {
+  margin:0; padding:0; height:100%; width:100%;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  font-family:Arial, sans-serif; background:#fff;
+}
+#canvas { max-width:90vw; max-height:90vw; }
 #downloadBtn { margin-top:20px; padding:10px 20px; font-size:1rem; cursor:pointer; }
 </style>
 </head>
 <body>
 
-<canvas id="canvas" width="200" height="200"></canvas>
+<canvas id="canvas"></canvas>
 <button id="downloadBtn">Download PFP</button>
 
 <script>
@@ -26,29 +30,35 @@ if(!userImage){ window.location.href='/'; }
 
 const img = new Image();
 const twibbon = new Image();
-let loaded=0;
-img.onload=checkLoad; twibbon.onload=checkLoad;
-img.src=userImage; twibbon.src=twibbonURL;
+let loaded = 0;
+img.onload = checkLoad; twibbon.onload = checkLoad;
+img.src = userImage; twibbon.src = twibbonURL;
 
 function checkLoad(){
   loaded++;
-  if(loaded<2) return;
-  canvas.width=img.width; canvas.height=img.height;
+  if(loaded < 2) return;
+
+  // Hitung square crop (ambil sisi terkecil)
+  const side = Math.min(img.width, img.height);
+  const sx = (img.width - side)/2;
+  const sy = (img.height - side)/2;
+
+  canvas.width = side;
+  canvas.height = side;
+
+  // Draw user photo (square crop)
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  ctx.save();
-  ctx.beginPath();
-  ctx.arc(canvas.width/2, canvas.height/2, canvas.width/2, 0, Math.PI*2);
-  ctx.closePath();
-  ctx.clip();
-  ctx.drawImage(img,0,0,canvas.width,canvas.height);
-  ctx.restore();
-  ctx.drawImage(twibbon,0,0,canvas.width,canvas.height);
+  ctx.drawImage(img, sx, sy, side, side, 0, 0, canvas.width, canvas.height);
+
+  // Draw twibbon overlay
+  ctx.drawImage(twibbon, 0, 0, canvas.width, canvas.height);
 }
 
+// Download
 downloadBtn.addEventListener('click',()=>{
-  const link=document.createElement('a');
-  link.href=canvas.toDataURL('image/png');
-  link.download='twibbon_pfp.png';
+  const link = document.createElement('a');
+  link.href = canvas.toDataURL('image/png');
+  link.download = 'twibbon_pfp.png';
   link.click();
 });
 </script>
