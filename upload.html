@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Twibbon | Memproses Foto</title>
     <style>
-    /* 1. CSS Global dan Body (Layar Polos) */
     body {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         margin: 0;
@@ -27,40 +26,42 @@
         max-width: 90%;
     }
     
-    /* 3. Area Pratinjau Foto dengan Spinner (Menggunakan Flexbox untuk Centering) */
-    #preview-wrapper {
-        position: relative;
-        /* Ukuran wrapper yang menentukan batas luar spinner */
+    /* 3. Kontainer Tumpukan Pusat (Tempat semua elemen bertumpuk) */
+    #central-stack {
+        position: relative; /* Ini adalah kunci! Semua anak absolut akan relatif terhadap ini */
         width: 250px; 
         height: 250px;
         margin-bottom: 30px;
-        
-        /* FIX: Menggunakan Flexbox untuk memusatkan semua konten anak */
-        display: flex; 
+        /* Menggunakan Flexbox di sini untuk memusatkan secara internal jika ada elemen non-absolut, 
+           tapi utamanya untuk menentukan dimensi absolut */
+        display: flex;
         justify-content: center;
         align-items: center;
     }
 
+    /* 4. Kontainer Foto (Diposisikan ABSOLUT untuk tumpukan yang tepat) */
     #preview-container {
-        /* Ukuran container foto yang lebih kecil */
+        position: absolute; /* Kunci: Diposisikan terhadap #central-stack */
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%); /* Kunci: Memusatkan secara presisi */
+
         width: 200px; 
         height: 200px;
         border-radius: 50%; 
         overflow: hidden;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); 
         background-color: #ffffff;
-        position: relative; 
-        z-index: 2; /* Di atas spinner */
+        z-index: 3; /* Di atas spinner */
     }
 
     #user-photo {
-        /* object-fit: cover memastikan centering gambar di dalamnya */
         width: 100%;
         height: 100%;
         object-fit: cover; 
     }
     
-    /* 4. Spinner Layer 1: Bingkai Statis */
+    /* 5. Spinner Layer 1: Bingkai Statis (Posisi ABSOLUT) */
     .spinner-frame {
         position: absolute;
         top: 0;
@@ -72,7 +73,7 @@
         z-index: 1;
     }
 
-    /* 5. Spinner Layer 2: Lingkaran Berputar */
+    /* 6. Spinner Layer 2: Lingkaran Berputar (Posisi ABSOLUT) */
     .spinner-outer {
         position: absolute;
         top: 0;
@@ -83,7 +84,7 @@
         border-top: 10px solid #10b981; 
         border-radius: 50%;
         animation: spin 1.5s linear infinite;
-        z-index: 3;
+        z-index: 2; /* Di atas frame, di bawah foto */
     }
     
     @keyframes spin {
@@ -91,7 +92,7 @@
         100% { transform: rotate(360deg); }
     }
 
-    /* 6. Teks dan Tips */
+    /* 7. Teks dan Tips */
     h2 {
         color: #1f2937; 
         margin-bottom: 25px; 
@@ -110,14 +111,14 @@
         color: #4b5563;
         text-align: center;
     }
-</style>
+        </style>
 </head>
 <body>
 
-    <div id="processing-area">
+<div id="processing-area">
     <h2>Sedang Memproses Foto Anda...</h2>
 
-    <div id="preview-wrapper">
+    <div id="central-stack">
         <div class="spinner-frame"></div> 
         
         <div class="spinner-outer"></div> 
@@ -128,7 +129,7 @@
     </div>
     
     <div id="processing-tips">Memulai Pemrosesan...</div>
-    </div>
+</div>
     
     <script>
         const tips = [
