@@ -1,251 +1,49 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Formatter HTML • CSS • JS</title>
+<title>PFP Twibbon</title>
 <style>
-body {
-  font-family: monospace;
-  background: #fafafa;
-  color: #222;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding: 20px;
-  height: 100vh;
-  margin: 0;
-}
-.editor {
-  width: 100%;
-  max-width: 800px;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-}
-.editor-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #f0f0f0;
-  padding: 10px;
-  font-size: 14px;
-  border-bottom: 1px solid #ddd;
-}
-.tabs {
-  display: flex;
-  gap: 6px;
-}
-.tab {
-  padding: 5px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  color: #777;
-  border: 1px solid transparent;
-}
-.tab.active {
-  background: #0078d4;
-  color: white;
-  border-color: #0078d4;
-}
-.editor-body {
-  display: flex;
-  height: 70vh;
-  position: relative;
-}
-.line-numbers {
-  background: #f8f8f8;
-  color: #999;
-  text-align: right;
-  padding: 8px 5px;
-  user-select: none;
-  overflow: hidden;
-  white-space: pre;
-  border-right: 1px solid #ddd;
-  min-width: 40px;
-}
-textarea {
-  flex: 1;
-  background: white;
-  color: #222;
-  border: none;
-  resize: none;
-  outline: none;
-  padding: 8px 10px;
-  font-size: 14px;
-  font-family: monospace;
-  line-height: 1.4;
-  overflow: auto;
-  white-space: pre;
-}
-.editor-buttons {
-  display: flex;
-  gap: 10px;
-  padding: 10px;
-}
-button {
-  background: #0078d4;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 8px 12px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background 0.2s;
-}
-button:hover {
-  background: #0a6ec5;
-}
+  /* Loading screen full layar */
+  #loadingScreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-family: Arial, sans-serif;
+    z-index: 9999;
+  }
+
+  /* Konten utama disembunyikan dulu */
+  #mainContent {
+    display: none;
+  }
 </style>
 </head>
 <body>
 
-<div class="editor">
-  <div class="editor-header">
-    <span><b>Formatter VSCode Style</b></span>
-    <div class="tabs">
-      <div class="tab active" data-type="html">HTML</div>
-      <div class="tab" data-type="css">CSS</div>
-      <div class="tab" data-type="js">JS</div>
-    </div>
-  </div>
+<!-- Loading Screen -->
+<div id="loadingScreen">Loading...</div>
 
-  <div class="editor-body">
-    <div class="line-numbers" id="lines">1</div>
-    <textarea id="codeInput" placeholder="// Tulis kode di sini..."></textarea>
-  </div>
-
-  <div class="editor-buttons">
-    <button id="btnFormat">Format</button>
-    <button id="btnCopy">Copy</button>
-    <button id="btnDownload">Download</button>
-  </div>
+<!-- Konten utama -->
+<div id="mainContent">
+  <h1>Selamat datang di PFP Twibbon!</h1>
+  <p>Konten utama muncul setelah loading.</p>
 </div>
 
 <script>
-let currentTab = "html";
-const codeInput = document.getElementById("codeInput");
-const lines = document.getElementById("lines");
-const btnFormat = document.getElementById("btnFormat");
-const btnCopy = document.getElementById("btnCopy");
-const btnDownload = document.getElementById("btnDownload");
-const tabs = document.querySelectorAll(".tab");
-const storage = { html: "", css: "", js: "" };
-
-// --- LINE NUMBER ---
-function updateLineNumbers() {
-  const totalLines = (codeInput.value.trim() === "") ? 1 : codeInput.value.split("\n").length;
-  lines.textContent = Array.from({length: totalLines}, (_, i) => i + 1).join("\n");
-  lines.scrollTop = codeInput.scrollTop;
-}
-codeInput.addEventListener("input", updateLineNumbers);
-codeInput.addEventListener("scroll", updateLineNumbers);
-updateLineNumbers();
-
-// --- TAB SWITCH ---
-tabs.forEach(tab => {
-  tab.addEventListener("click", () => {
-    tabs.forEach(t => t.classList.remove("active"));
-    tab.classList.add("active");
-    storage[currentTab] = codeInput.value;
-    currentTab = tab.dataset.type;
-    codeInput.value = storage[currentTab];
-    updateLineNumbers();
-    const placeholder = currentTab === 'html' ? '<!-- Tulis kode HTML di sini -->' :
-                        currentTab === 'css' ? '/* Tulis kode CSS di sini */' :
-                        '// Tulis kode JavaScript di sini';
-    codeInput.setAttribute('placeholder', placeholder);
-  });
-});
-
-// --- VALIDASI ---
-function isValidHTML(code) {
-  return /<[a-z][\s\S]*>/.test(code.toLowerCase());
-}
-
-function isValidCSS(code) {
-  // Hilangkan komentar
-  const clean = code.replace(/\/\*[\s\S]*?\*\//g, '').trim();
-  const pattern = /^([a-zA-Z][\w-]*|[.#][\w-]+)\s*\{[^}]*\}/m;
-  return pattern.test(clean);
-}
-
-function isValidJS(code) {
-  const keywords = ['function','const','let','var','if','for','return'];
-  const hasKeyword = keywords.some(k => new RegExp('\\b'+k+'\\b').test(code));
-  const hasCurly = /[\{\}]/.test(code);
-  return hasKeyword || hasCurly;
-}
-
-// --- FORMATTER ---
-function formatHTML(html) {
-  html = html.replace(/>\s+</g, "><");
-  const tokens = html.replace(/></g, ">\n<").split("\n");
-  let indent = 0, result = "";
-  const voidTags = ["area","base","br","col","embed","hr","img","input","link","meta","param","source","track","wbr"];
-  for (let line of tokens) {
-    line = line.trim();
-    if (/^<\/\w/.test(line)) indent--;
-    result += "  ".repeat(indent) + line + "\n";
-    if (/^<\w[^>]*[^\/]>$/.test(line) && !voidTags.some(tag => line.startsWith(`<${tag}`))) indent++;
-  }
-  return result.trim();
-}
-
-function formatCSS(css) {
-  css = css.replace(/\s*([\{\};:,])\s*/g, "$1");
-  css = css.replace(/\{/g, " {\n  ");
-  css = css.replace(/\;/g, ";\n  ");
-  css = css.replace(/\}\s*/g, "\n}\n");
-  return css.trim();
-}
-
-function formatJS(js) {
-  js = js.replace(/\s+/g, " ").trim();
-  js = js.replace(/;/g, ";\n");
-  js = js.replace(/\{/g, " {\n  ");
-  js = js.replace(/\}/g, "\n}\n");
-  return js.replace(/\n{2,}/g, "\n").trim();
-}
-
-// --- BUTTONS ---
-btnFormat.addEventListener("click", () => {
-  const code = codeInput.value.trim();
-  if (!code) { alert("Masukkan kode terlebih dahulu!"); return; }
-
-  // VALIDASI
-  let valid = true;
-  if (currentTab === "html" && !isValidHTML(code)) { alert("HTML tidak valid!"); valid = false; }
-  if (currentTab === "css" && !isValidCSS(code)) { alert("CSS tidak valid!"); valid = false; }
-  if (currentTab === "js" && !isValidJS(code)) { alert("JS tidak valid!"); valid = false; }
-  if (!valid) return;
-
-  // FORMAT
-  if (currentTab === "html") codeInput.value = formatHTML(code);
-  if (currentTab === "css") codeInput.value = formatCSS(code);
-  if (currentTab === "js") codeInput.value = formatJS(code);
-  updateLineNumbers();
-});
-
-btnCopy.addEventListener("click", () => {
-  codeInput.select();
-  document.execCommand("copy");
-  alert("Kode berhasil dicopy!");
-});
-
-btnDownload.addEventListener("click", () => {
-  const blob = new Blob([codeInput.value], { type: "text/plain" });
-  const a = document.createElement("a");
-  const ext = currentTab === "html" ? "html" : currentTab === "css" ? "css" : "js";
-  a.download = `code.${ext}`;
-  a.href = URL.createObjectURL(blob);
-  a.click();
-  URL.revokeObjectURL(a.href);
-});
+  // Tampilkan konten utama setelah 10 detik
+  setTimeout(() => {
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+  }, 10000); // 10000ms = 10 detik
 </script>
 
 </body>
