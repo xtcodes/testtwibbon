@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Twibbon | Memproses Foto</title>
     <style>
+    /* 1. CSS Global dan Body */
     body {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         margin: 0;
@@ -26,26 +27,24 @@
         max-width: 90%;
     }
     
-    /* 3. Kontainer Tumpukan Pusat (Tempat semua elemen bertumpuk) */
+    /* 3. Kontainer Tumpukan Pusat (Jangkar semua elemen) */
     #central-stack {
-        position: relative; /* Ini adalah kunci! Semua anak absolut akan relatif terhadap ini */
+        position: relative; 
+        /* Ukuran yang menampung FOTO dan BORDER SPINNER */
         width: 250px; 
         height: 250px;
         margin-bottom: 30px;
-        /* Menggunakan Flexbox di sini untuk memusatkan secara internal jika ada elemen non-absolut, 
-           tapi utamanya untuk menentukan dimensi absolut */
+        /* Menggunakan flexbox untuk memastikan konten di dalamnya (meskipun absolut) 
+           dikelola dengan baik */
         display: flex;
         justify-content: center;
         align-items: center;
     }
 
-    /* 4. Kontainer Foto (Diposisikan ABSOLUT untuk tumpukan yang tepat) */
+    /* 4. Kontainer Foto (Pusat visual dari tumpukan) */
     #preview-container {
-        position: absolute; /* Kunci: Diposisikan terhadap #central-stack */
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%); /* Kunci: Memusatkan secara presisi */
-
+        /* FIX KRITIS: Tetap relative atau tidak ada posisi agar berada di tengah Flexbox */
+        position: relative; 
         width: 200px; 
         height: 200px;
         border-radius: 50%; 
@@ -58,11 +57,12 @@
     #user-photo {
         width: 100%;
         height: 100%;
-        object-fit: cover; 
+        object-fit: cover; /* Memastikan foto terpusat dan terpotong di dalam kontainer */
     }
     
-    /* 5. Spinner Layer 1: Bingkai Statis (Posisi ABSOLUT) */
+    /* 5. Spinner Layer 1: Bingkai Statis */
     .spinner-frame {
+        /* FIX: Dibuat absolut terhadap #central-stack, mengisi penuh */
         position: absolute;
         top: 0;
         left: 0;
@@ -73,8 +73,9 @@
         z-index: 1;
     }
 
-    /* 6. Spinner Layer 2: Lingkaran Berputar (Posisi ABSOLUT) */
+    /* 6. Spinner Layer 2: Lingkaran Berputar */
     .spinner-outer {
+        /* FIX: Dibuat absolut terhadap #central-stack, mengisi penuh */
         position: absolute;
         top: 0;
         left: 0;
@@ -84,7 +85,7 @@
         border-top: 10px solid #10b981; 
         border-radius: 50%;
         animation: spin 1.5s linear infinite;
-        z-index: 2; /* Di atas frame, di bawah foto */
+        z-index: 2; 
     }
     
     @keyframes spin {
@@ -111,7 +112,7 @@
         color: #4b5563;
         text-align: center;
     }
-        </style>
+    </style>
 </head>
 <body>
 
