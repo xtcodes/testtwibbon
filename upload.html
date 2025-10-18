@@ -29,69 +29,58 @@
     
     /* 3. Kontainer Tumpukan Pusat (Jangkar semua elemen) */
     #central-stack {
-        position: relative; 
-        /* Ukuran yang menampung FOTO dan BORDER SPINNER */
-        width: 250px; 
-        height: 250px;
-        margin-bottom: 30px;
-        /* Menggunakan flexbox untuk memastikan konten di dalamnya (meskipun absolut) 
-           dikelola dengan baik */
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
+    position: relative;
+    width: 250px;
+    height: 250px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
-    /* 4. Kontainer Foto (Pusat visual dari tumpukan) */
-    #preview-container {
-        /* FIX KRITIS: Tetap relative atau tidak ada posisi agar berada di tengah Flexbox */
-        position: relative; 
-        width: 200px; 
-        height: 200px;
-        border-radius: 50%; 
-        overflow: hidden;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); 
-        background-color: #ffffff;
-        z-index: 3; /* Di atas spinner */
-    }
+#preview-container {
+    position: absolute; /* penting agar bisa berada di atas spinner */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* pusat sempurna */
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    background-color: #fff;
+    z-index: 3;
+}
 
-    #user-photo {
-        width: 100%;
-        height: 100%;
-        object-fit: cover; /* Memastikan foto terpusat dan terpotong di dalam kontainer */
-    }
-    
-    /* 5. Spinner Layer 1: Bingkai Statis */
-    .spinner-frame {
-        /* FIX: Dibuat absolut terhadap #central-stack, mengisi penuh */
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        border: 10px solid #cbd5e1; 
-        border-radius: 50%;
-        z-index: 1;
-    }
+#user-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* tetap proporsional dan terpotong sesuai lingkaran */
+}
 
-    /* 6. Spinner Layer 2: Lingkaran Berputar */
-    .spinner-outer {
-        /* FIX: Dibuat absolut terhadap #central-stack, mengisi penuh */
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        border: 10px solid transparent; 
-        border-top: 10px solid #10b981; 
-        border-radius: 50%;
-        animation: spin 1.5s linear infinite;
-        z-index: 2; 
-    }
-    
-    @keyframes spin {
-        0% { transform: rotate(0deg); } 
-        100% { transform: rotate(360deg); }
-    }
+/* Spinner */
+.spinner-frame, .spinner-outer {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    border-radius: 50%;
+}
+
+.spinner-frame {
+    border: 10px solid #cbd5e1;
+    z-index: 1;
+}
+
+.spinner-outer {
+    border: 10px solid transparent;
+    border-top: 10px solid #10b981;
+    animation: spin 1.5s linear infinite;
+    z-index: 2;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
 
     /* 7. Teks dan Tips */
     h2 {
@@ -117,17 +106,18 @@
 <body>
 
 <div id="processing-area">
-    <h2>Sedang Memproses Foto Anda...</h2>
+<div id="central-stack">
+    <!-- Spinner statis -->
+    <div class="spinner-frame"></div>
 
-    <div id="central-stack">
-        <div class="spinner-frame"></div> 
-        
-        <div class="spinner-outer"></div> 
+    <!-- Spinner animasi -->
+    <div class="spinner-outer"></div>
 
-        <div id="preview-container">
-            <img id="user-photo" src="" alt="Foto Unggahan Pengguna">
-        </div>
+    <!-- Foto pengguna di tengah spinner -->
+    <div id="preview-container">
+        <img id="user-photo" src="" alt="Foto Unggahan Pengguna">
     </div>
+</div>
     
     <div id="processing-tips">Memulai Pemrosesan...</div>
 </div>
