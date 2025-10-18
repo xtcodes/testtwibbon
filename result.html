@@ -1,70 +1,130 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Result</title>
-<style>
-body, html {
-  margin:0; padding:0; height:100%; width:100%;
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  font-family:Arial, sans-serif; background:#fff;
-}
-#canvas { max-width:90vw; max-height:90vw; opacity:0; transition:opacity 0.5s; }
-#downloadBtn { margin-top:20px; padding:10px 20px; font-size:1rem; cursor:pointer; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twibbon | Hasil Akhir</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            text-align: center;
+            background-color: #f9f9f9;
+        }
+        h1 { color: #28a745; margin-bottom: 30px; }
+        
+        /* Canvas hanya digunakan sebagai wadah, hasilnya akan jadi gambar */
+        #twibbon-canvas {
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        #final-result {
+            margin: 30px 0;
+        }
+
+        .download-button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-decoration: none; /* Untuk hyperlink */
+            display: inline-block;
+        }
+        .download-button:hover { background-color: #0056b3; }
+    </style>
 </head>
 <body>
 
-<canvas id="canvas"></canvas>
-<button id="downloadBtn">Download PFP</button>
+    <h1>Twibbon Anda Sudah Siap! 🎉</h1>
+    
+    <div id="final-result">
+        <canvas id="twibbon-canvas" width="400" height="400" style="display: none;"></canvas>
+        <img id="twibbon-final-image" alt="Twibbon Hasil Akhir" style="max-width: 100%; border-radius: 10px;">
+    </div>
+    
+    <a id="download-link" href="#" download="twibbon_saya.png" class="download-button">
+        ⬇️ Unduh Gambar
+    </a>
 
-<script>
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-const downloadBtn = document.getElementById('downloadBtn');
-const userImage = localStorage.getItem('userImage');
-const twibbonURL = 'twibbon.png';
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const photoDataURL = sessionStorage.getItem('uploadedPhoto');
+            const twibbonFrameURL = 'twibbon.png'; // GANTI DENGAN NAMA FILE TWIBBON ANDA!
 
-if(!userImage){ window.location.href='/'; }
+            if (!photoDataURL) {
+                alert("Data foto tidak ditemukan. Kembali ke awal.");
+                window.location.href = 'index.html';
+                return;
+            }
 
-const img = new Image();
-const twibbon = new Image();
-let loaded = 0;
-img.onload = checkLoad; twibbon.onload = checkLoad;
-img.src = userImage; twibbon.src = twibbonURL;
+            // Fungsi utama untuk menggabungkan gambar
+            combineImages(photoDataURL, twibbonFrameURL);
+        });
 
-function checkLoad(){
-  loaded++;
-  if(loaded < 2) return;
+        function combineImages(userPhotoURL, frameURL) {
+            const canvas = document.getElementById('twibbon-canvas');
+            const ctx = canvas.getContext('2d');
+            const finalImageElement = document.getElementById('twibbon-final-image');
+            const downloadLink = document.getElementById('download-link');
+            const size = 400; // Ukuran output twibbon (400x400 piksel)
 
-  // Hitung square crop (ambil sisi terkecil)
-  const side = Math.min(img.width, img.height);
-  const sx = (img.width - side)/2;
-  const sy = (img.height - side)/2;
+            canvas.width = size;
+            canvas.height = size;
 
-  canvas.width = side;
-  canvas.height = side;
+            let photo = new Image();
+            let frame = new Image();
+            let imagesLoaded = 0;
 
-  // Draw user photo (square crop)
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  ctx.drawImage(img, sx, sy, side, side, 0, 0, canvas.width, canvas.height);
+            const checkLoadStatus = () => {
+                imagesLoaded++;
+                if (imagesLoaded === 2) {
+                    // Semua gambar sudah dimuat, mulai penggabungan
 
-  // Draw twibbon overlay
-  ctx.drawImage(twibbon, 0, 0, canvas.width, canvas.height);
+                    // 1. Gambar Foto Pengguna (Lapisan Bawah)
+                    // Menggambar foto agar memenuhi canvas (object-fit: cover)
+                    const hRatio = canvas.width / photo.width;
+                    const vRatio = canvas.height / photo.height;
+                    const ratio = Math.max(hRatio, vRatio); // Ambil rasio terbesar (cover)
+                    const centerShiftX = (canvas.width - photo.width * ratio) / 2;
+                    const centerShiftY = (canvas.height - photo.height * ratio) / 2;
+                    
+                    ctx.drawImage(
+                        photo, 0, 0, photo.width, photo.height, 
+                        centerShiftX, centerShiftY, photo.width * ratio, photo.height * ratio
+                    );
 
-  // Fade-in canvas
-  canvas.style.opacity = 1;
-}
+                    // 2. Gambar Twibbon (Lapisan Atas)
+                    // Twibbon harus memiliki transparansi (PNG) dan ukurannya sama dengan canvas
+                    ctx.drawImage(frame, 0, 0, size, size);
 
-// Download
-downloadBtn.addEventListener('click',()=>{
-  const link = document.createElement('a');
-  link.href = canvas.toDataURL('image/png');
-  link.download = 'twibbon_pfp.png';
-  link.click();
-});
-</script>
+                    // 3. Konversi Canvas ke Gambar Akhir
+                    const finalDataURL = canvas.toDataURL('image/png');
 
+                    // Tampilkan gambar hasil di elemen <img>
+                    finalImageElement.src = finalDataURL;
+                    
+                    // Set link unduhan
+                    downloadLink.href = finalDataURL;
+
+                    // Hapus data foto pengguna dari sessionStorage (pembersihan)
+                    sessionStorage.removeItem('uploadedPhoto');
+                }
+            };
+
+            photo.onload = checkLoadStatus;
+            frame.onload = checkLoadStatus;
+
+            photo.src = userPhotoURL;
+            frame.src = frameURL;
+            frame.crossOrigin = "Anonymous"; // Penting jika twibbon di-load dari CDN/tempat lain
+        }
+    </script>
 </body>
 </html>
