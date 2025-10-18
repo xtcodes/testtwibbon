@@ -1,87 +1,106 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PFP Twibbon</title>
-<style>
-body, html {
-  margin:0; padding:0; height:100%; width:100%;
-  font-family:Arial, sans-serif;
-}
-#loadingScreen {
-  position:fixed; top:0; left:0; width:100%; height:100%;
-  background:#fff;
-  display:flex; align-items:center; justify-content:center;
-  font-size:2rem; z-index:9999;
-  opacity:1; transition:opacity 0.5s;
-}
-#mainContent {
-  display:none; height:100%;
-  display:flex; flex-direction:column;
-  align-items:center; justify-content:center;
-  padding:20px; box-sizing:border-box;
-  text-align:center;
-  opacity:0; transition:opacity 0.5s;
-}
-#article { margin-bottom:20px; max-width:400px; }
-#dropArea {
-  width:100%; max-width:300px; aspect-ratio:1/1;
-  border:2px dashed #aaa; border-radius:12px;
-  display:flex; align-items:center; justify-content:center;
-  color:#888; cursor:pointer; transition:border-color 0.3s;
-}
-#dropArea.hover { border-color:#555; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buat Twibbon | Langkah 1</title>
+    <style>
+        /* CSS Sederhana */
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; text-align: center; }
+        .container { max-width: 600px; margin: 0 auto; }
+        
+        /* 1. CSS LAYAR LOADING */
+        #loading-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #f0f0f0; display: flex; justify-content: center; 
+            align-items: center; z-index: 1000; transition: opacity 0.5s ease-out;
+        }
+        .spinner {
+            border: 5px solid #ccc; border-top: 5px solid #007bff; border-radius: 50%;
+            width: 40px; height: 40px; animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .hidden { display: none !important; }
+
+        /* 2. CSS KONTEN UTAMA */
+        #main-content { padding-top: 40px; display: none; }
+        .upload-button-label {
+            background-color: #28a745; color: white; padding: 10px 20px; 
+            border-radius: 5px; font-size: 18px; cursor: pointer; display: inline-block;
+            transition: background-color 0.3s; margin-top: 20px;
+        }
+        .upload-button-label:hover { background-color: #1e7e34; }
+        #photo-upload { display: none; } /* Sembunyikan input file asli */
+        article { text-align: left; margin-bottom: 30px; }
+    </style>
 </head>
 <body>
 
-<div id="loadingScreen">Loading...</div>
+    <div id="loading-screen">
+        <div class="spinner"></div>
+    </div>
 
-<div id="mainContent">
-  <div id="article">
-    <h2>Proyek PFP Twibbon</h2>
-    <p>Unggah gambar Anda untuk membuat PFP dengan twibbon interaktif.</p>
-  </div>
-  <div id="dropArea">Klik atau seret gambar di sini</div>
-  <input type="file" id="fileInput" accept="image/*" style="display:none;">
-</div>
+    <div id="main-content" class="container">
+        <h1>✨ Buat Twibbon Sederhana</h1>
+        
+        <article>
+            <p>Selamat datang! Aplikasi ini akan menggabungkan foto profil Anda dengan bingkai twibbon default kami secara otomatis. Proses ini cepat dan mudah.</p>
+            <h3>Cara Kerja:</h3>
+            <ol>
+                <li>Unggah foto Anda di bawah ini.</li>
+                <li>Foto akan diproses (dengan sedikit sentuhan "magic").</li>
+                <li>Anda dapat mengunduh hasilnya di halaman berikutnya!</li>
+            </ol>
+        </article>
 
-<script>
-const loadingScreen = document.getElementById('loadingScreen');
-const mainContent = document.getElementById('mainContent');
-const dropArea = document.getElementById('dropArea');
-const fileInput = document.getElementById('fileInput');
+        <input type="file" id="photo-upload" accept="image/*">
+        <label for="photo-upload" class="upload-button-label">
+            Pilih Foto Anda untuk Mulai
+        </label>
+    </div>
 
-// Loading 10 detik
-setTimeout(()=>{
-  loadingScreen.style.opacity=0;
-  setTimeout(()=>{
-    loadingScreen.style.display='none';
-    mainContent.style.display='flex';
-    setTimeout(()=>mainContent.style.opacity=1,50);
-  },500);
-},10000);
+    <script>
+        // --- 1. KONTROL LAYAR LOADING ---
+        window.addEventListener('load', function() {
+            const loadingScreen = document.getElementById('loading-screen');
+            const mainContent = document.getElementById('main-content');
+            
+            // Fade out layar loading
+            loadingScreen.style.opacity = '0';
+            
+            // Setelah fade out selesai (500ms), tampilkan konten utama
+            setTimeout(() => {
+                loadingScreen.classList.add('hidden');
+                mainContent.style.display = 'block';
+            }, 500);
+        });
 
-// DropArea events
-dropArea.addEventListener('click',()=>fileInput.click());
-dropArea.addEventListener('dragover', e=>{ e.preventDefault(); dropArea.classList.add('hover'); });
-dropArea.addEventListener('dragleave', ()=>dropArea.classList.remove('hover'));
-dropArea.addEventListener('drop', e=>{
-  e.preventDefault(); dropArea.classList.remove('hover');
-  if(e.dataTransfer.files.length) sendToUpload(e.dataTransfer.files[0]);
-});
-fileInput.addEventListener('change', ()=>{ if(fileInput.files.length) sendToUpload(fileInput.files[0]); });
+        // --- 2. LOGIKA UNGGAH FILE & TRANSISI KE /upload ---
+        document.getElementById('photo-upload').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            
+            if (file) {
+                // Tampilkan lagi loading screen saat pemrosesan dimulai
+                const loadingScreen = document.getElementById('loading-screen');
+                loadingScreen.classList.remove('hidden');
+                loadingScreen.style.opacity = '1';
 
-function sendToUpload(file){
-  const reader = new FileReader();
-  reader.onload = e=>{
-    localStorage.setItem('userImage', e.target.result);
-    window.location.href = 'upload.html';
-  };
-  reader.readAsDataURL(file);
-}
-</script>
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const photoDataURL = e.target.result; 
 
+                    // Simpan Data URL (Base64) foto ke sessionStorage
+                    sessionStorage.setItem('uploadedPhoto', photoDataURL);
+                    
+                    // Navigasi ke halaman /upload
+                    window.location.href = 'upload.html';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
 </body>
 </html>
