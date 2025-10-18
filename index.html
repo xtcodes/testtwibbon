@@ -71,11 +71,11 @@
             // Fade out layar loading
             loadingScreen.style.opacity = '0';
             
-            // Setelah fade out selesai (500ms), tampilkan konten utama
+            // Setelah fade out selesai (1000ms), tampilkan konten utama
             setTimeout(() => {
                 loadingScreen.classList.add('hidden');
                 mainContent.style.display = 'block';
-            }, 500);
+            }, 1000);
         });
 
         // --- 2. LOGIKA UNGGAH FILE & TRANSISI KE /upload ---
