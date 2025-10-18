@@ -158,17 +158,28 @@ btnFormat.addEventListener("click", () => {
   updateLineNumbers();
 });
 
-// === HTML PRETTY FORMAT ===
+// === FIXED HTML FORMATTER ===
 function formatHTML(html) {
-  const voidTags = /^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/i;
   html = html.replace(/>\s+</g, '><').trim();
-  const tokens = html.split(/(?=<)|(?<=>)/g).filter(Boolean);
-  let indent = 0, formatted = '';
-  tokens.forEach(t => {
-    if (t.match(/^<\/\w/)) indent--;
-    formatted += '  '.repeat(Math.max(indent, 0)) + t.trim() + '\n';
-    if (t.match(/^<\w[^>]*[^/]>$/) && !t.match(voidTags)) indent++;
-  });
+  const lines = html.split(/(?=<)|(?<=>)/g).filter(Boolean);
+  let formatted = "", indent = 0;
+  const voidTags = ["area","base","br","col","embed","hr","img","input","link","meta","param","source","track","wbr"];
+
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i].trim();
+    if (!line) continue;
+
+    // closing tag
+    if (/^<\/[^>]+>/.test(line)) indent--;
+
+    formatted += "  ".repeat(indent) + line + "\n";
+
+    // opening tag but not void/self-closing
+    if (/^<[^/!][^>]*[^/]?>/.test(line)) {
+      const tag = line.match(/^<(\w+)/);
+      if (tag && !voidTags.includes(tag[1])) indent++;
+    }
+  }
   return formatted.trim();
 }
 
