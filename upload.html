@@ -1,70 +1,139 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Result</title>
-<style>
-body, html {
-  margin:0; padding:0; height:100%; width:100%;
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  font-family:Arial, sans-serif; background:#fff;
-}
-#canvas { max-width:90vw; max-height:90vw; opacity:0; transition:opacity 0.5s; }
-#downloadBtn { margin-top:20px; padding:10px 20px; font-size:1rem; cursor:pointer; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twibbon | Memproses Foto</title>
+    <style>
+        /* CSS Sederhana */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        
+        /* Area Pratinjau Foto */
+        #preview-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            background-color: #fff;
+        }
+
+        #user-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Pastikan foto menutupi area */
+        }
+        
+        /* Overlay Spinner dan Tips */
+        #processing-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.6); /* Semi-transparan gelap */
+            color: white;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* Spinner */
+        .spinner {
+            border: 6px solid rgba(255, 255, 255, 0.3);
+            border-top: 6px solid #00ff73; /* Warna hijau terang */
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #processing-tips {
+            margin-top: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+    </style>
 </head>
 <body>
 
-<canvas id="canvas"></canvas>
-<button id="downloadBtn">Download PFP</button>
+    <div id="preview-container">
+        <img id="user-photo" src="" alt="Foto Unggahan Pengguna">
+        
+        <div id="processing-overlay">
+            <div class="spinner"></div>
+            <div id="processing-tips">Memulai Pemrosesan...</div>
+        </div>
+    </div>
+    
+    <h2>Sedang Memproses Foto Anda...</h2>
 
-<script>
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-const downloadBtn = document.getElementById('downloadBtn');
-const userImage = localStorage.getItem('userImage');
-const twibbonURL = 'https://i.ibb.co/7v3h1tW/twibbon.png';
+    <script>
+        const tips = [
+            "1/5: Mengambil bingkai twibbon default kami.",
+            "2/5: Menganalisis resolusi foto Anda.",
+            "3/5: Mengubah ukuran dan memotong gambar agar pas.",
+            "4/5: Menyisipkan foto ke dalam bingkai twibbon.",
+            "5/5: Menyelesaikan efek dan mengoptimalkan gambar."
+        ];
+        let step = 0;
+        const totalSteps = tips.length;
 
-if(!userImage){ window.location.href='../index.html'; }
+        document.addEventListener('DOMContentLoaded', function() {
+            const photoDataURL = sessionStorage.getItem('uploadedPhoto');
+            const userPhoto = document.getElementById('user-photo');
 
-const img = new Image();
-const twibbon = new Image();
-let loaded = 0;
-img.onload = checkLoad; twibbon.onload = checkLoad;
-img.src = userImage; twibbon.src = twibbonURL;
+            if (!photoDataURL) {
+                // Jika tidak ada data, kembalikan user ke halaman awal
+                alert("Foto tidak ditemukan. Silakan unggah ulang.");
+                window.location.href = 'index.html';
+                return;
+            }
 
-function checkLoad(){
-  loaded++;
-  if(loaded < 2) return;
+            // Tampilkan foto pengguna
+            userPhoto.src = photoDataURL;
 
-  // Hitung square crop (ambil sisi terkecil)
-  const side = Math.min(img.width, img.height);
-  const sx = (img.width - side)/2;
-  const sy = (img.height - side)/2;
+            // Mulai animasi tips
+            startProcessingAnimation();
+        });
 
-  canvas.width = side;
-  canvas.height = side;
+        function startProcessingAnimation() {
+            const tipsElement = document.getElementById('processing-tips');
 
-  // Draw user photo (square crop)
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  ctx.drawImage(img, sx, sy, side, side, 0, 0, canvas.width, canvas.height);
-
-  // Draw twibbon overlay
-  ctx.drawImage(twibbon, 0, 0, canvas.width, canvas.height);
-
-  // Fade-in canvas
-  canvas.style.opacity = 1;
-}
-
-// Download
-downloadBtn.addEventListener('click',()=>{
-  const link = document.createElement('a');
-  link.href = canvas.toDataURL('image/png');
-  link.download = 'twibbon_pfp.png';
-  link.click();
-});
-</script>
-
+            const intervalId = setInterval(() => {
+                if (step < totalSteps) {
+                    tipsElement.textContent = tips[step];
+                    step++;
+                } else {
+                    clearInterval(intervalId);
+                    // Setelah semua tips selesai, tunggu sebentar lalu pindah ke halaman hasil
+                    setTimeout(() => {
+                        window.location.href = 'result.html';
+                    }, 1000); // Jeda 1 detik sebelum pindah
+                }
+            }, 1000); // Ganti tips setiap 1 detik
+        }
+    </script>
 </body>
 </html>
