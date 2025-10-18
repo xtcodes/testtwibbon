@@ -5,148 +5,82 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Formatter HTML • CSS • JS</title>
 <style>
-  :root {
-    --bg: #f7f8fa;
-    --text: #222;
-    --muted: #666;
-    --accent: #007bff;
-    --border: #ddd;
-    --gutter-bg: #f0f0f0;
-    --gutter-text: #999;
+  :root{
+    --bg:#f7f8fa; --text:#222; --muted:#666; --accent:#007bff; --border:#ddd;
+    --gutter-bg:#f0f0f0; --gutter-text:#999;
   }
-  * { box-sizing: border-box; }
-  body {
-    font-family: system-ui, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    margin: 0;
-    padding: 20px;
-  }
-  header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1em;
-  }
-  h1 { margin: 0; font-size: 1.2em; }
-  .tabs {
-    display: flex;
-    gap: 8px;
-  }
-  .tab {
-    cursor: pointer;
-    padding: 6px 12px;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    background: white;
-    color: var(--muted);
-    font-weight: 500;
-    user-select: none;
-  }
-  .tab.active {
-    background: var(--accent);
-    color: white;
-    border-color: var(--accent);
-  }
-  .card {
-    background: white;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 12px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-  }
-  label { font-size: 13px; color: var(--muted); display:block; margin-bottom:4px;}
+  *{box-sizing:border-box}
+  body{font-family:system-ui, sans-serif;background:var(--bg);color:var(--text);margin:0;padding:20px}
+  header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1em}
+  h1{margin:0;font-size:1.2em}
+  .tabs{display:flex;gap:8px}
+  .tab{cursor:pointer;padding:6px 12px;border:1px solid var(--border);border-radius:6px;background:white;color:var(--muted);font-weight:500;user-select:none}
+  .tab.active{background:var(--accent);color:white;border-color:var(--accent)}
+  .card{background:white;border:1px solid var(--border);border-radius:8px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,0.05)}
+  label{font-size:13px;color:var(--muted);display:block;margin-bottom:4px}
 
-  /* ===== Editor dan Preview ===== */
+  /* editor and preview: keep gutter and content heights identical by flex/stretch */
   .editor-area, .preview-area {
-    display: flex;
-    position: relative;
-    overflow: hidden;
+    display:flex;
+    align-items:stretch;   /* ensure gutter stretches same height as content box */
+    gap:6px;
+  }
+  .gutter{
+    background:var(--gutter-bg);
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:8px 6px;
+    font-family:monospace;
+    font-size:13px;
+    color:var(--gutter-text);
+    line-height:1.45;
+    text-align:right;
+    overflow:auto;         /* allow scrolling for many lines */
+    flex:0 0 48px;         /* fixed width for gutter */
+    box-sizing:border-box;
+    user-select:none;
+  }
+  .gutter .lines{white-space:pre; margin:0; font-family:monospace; font-size:13px; line-height:1.45}
+  textarea{
+    width:100%;
+    min-height:180px;
+    font-family:monospace;
+    font-size:13px;
+    padding:8px;
+    border:1px solid var(--border);
+    border-radius:6px;
+    resize:vertical;
+    line-height:1.45;
+    overflow:auto;
+    box-sizing:border-box;
+  }
+  .controls{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}
+  button{padding:6px 10px;border-radius:6px;border:1px solid var(--border);cursor:pointer;background:var(--accent);color:white;font-weight:500}
+  button.ghost{background:white;color:var(--muted)}
+  .output{
+    background:#f0f0f0;
+    padding:8px;
+    border-radius:6px;
+    min-height:120px;
+    font-family:monospace;
+    font-size:13px;
+    white-space:pre;
+    overflow:auto;
+    line-height:1.45;
+    box-sizing:border-box;
+    width:100%;
+    border:1px solid var(--border);
   }
 
-  .gutter {
-    background: var(--gutter-bg);
-    border: 1px solid var(--border);
-    border-radius: 6px 0 0 6px;
-    padding: 8px 6px;
-    font-family: monospace;
-    font-size: 13px;
-    color: var(--gutter-text);
-    line-height: 1.45;
-    text-align: right;
-    overflow: auto;
-    user-select: none;
-    flex-shrink: 0;
-  }
-
-  .gutter .lines {
-    white-space: pre;
-    line-height: 1.45;
-    margin: 0;
-  }
-
-  textarea {
-    width: 100%;
-    min-height: 180px;
-    font-family: monospace;
-    font-size: 13px;
-    padding: 8px;
-    border: 1px solid var(--border);
-    border-radius: 0 6px 6px 0;
-    resize: vertical;
-    line-height: 1.45;
-    overflow: auto;
-  }
-
-  .controls { margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap; }
-  button {
-    padding: 6px 10px;
-    border-radius: 6px;
-    border: 1px solid var(--border);
-    cursor: pointer;
-    background: var(--accent);
-    color: white;
-    font-weight: 500;
-  }
-  button.ghost {
-    background: white;
-    color: var(--muted);
-  }
-
-  .output {
-    background: #f0f0f0;
-    padding: 8px;
-    border-radius: 0 6px 6px 0;
-    min-height: 120px;
-    font-family: monospace;
-    font-size: 13px;
-    white-space: pre-wrap;
-    overflow-x: auto;
-    line-height: 1.45;
-  }
-
-  /* ===== Responsif Mobile ===== */
-  @media (max-width: 700px) {
+  /* mobile: show gutter but reduce width */
+  @media (max-width:700px){
     .editor-area, .preview-area {
-      display: grid;
       grid-template-columns: 38px 1fr;
-      align-items: start;
+      display:grid;
+      gap:6px;
     }
-    .gutter {
-      position: sticky;
-      left: 0;
-      top: 0;
-      height: 100%;
-      border-right: 1px solid var(--border);
-      border-radius: 6px 0 0 6px;
-      z-index: 2;
-      overflow: auto;
-    }
-    textarea, .output {
-      border-radius: 0 6px 6px 0;
-      /* ensure space for gutter on mobile */
-      padding-left: 12px;
-    }
+    .gutter{flex:0 0 38px; position:sticky; left:0; top:0; z-index:2; border-radius:6px 0 0 6px}
+    textarea, .output{padding-left:10px}
   }
 </style>
 </head>
@@ -163,7 +97,7 @@
 <div class="card">
   <label id="labelTitle">HTML</label>
 
-  <div class="editor-area">
+  <div class="editor-area" id="editorArea">
     <div class="gutter" id="gutterInput"><pre class="lines" id="inputLines">1</pre></div>
     <textarea id="inputArea" placeholder="Tempel kode di sini..."></textarea>
   </div>
@@ -174,19 +108,20 @@
     <button id="btnDownload" class="ghost">Download</button>
   </div>
 
-  <div class="preview-area" style="margin-top:12px;">
+  <div class="preview-area" id="previewArea" style="margin-top:12px">
     <div class="gutter" id="gutterOutput"><pre class="lines" id="outputLines">1</pre></div>
     <pre class="output" id="output">Hasil format akan muncul di sini.</pre>
   </div>
 </div>
 
 <script>
-/* ===== state ===== */
+/* -------------------------
+   State & elements
+   ------------------------- */
 let currentTab = 'html';
+const tabs = document.querySelectorAll('.tab');
 const inputArea = document.getElementById('inputArea');
 const output = document.getElementById('output');
-const labelTitle = document.getElementById('labelTitle');
-const tabs = document.querySelectorAll('.tab');
 const inputLines = document.getElementById('inputLines');
 const outputLines = document.getElementById('outputLines');
 const gutterInput = document.getElementById('gutterInput');
@@ -195,48 +130,31 @@ const gutterOutput = document.getElementById('gutterOutput');
 const storageRaw = { html: '', css: '', js: '' };
 const storageFormatted = { html: '', css: '', js: '' };
 
-/* ===== helpers ===== */
-function repeat(n, fn) {
-  const arr = [];
-  for (let i = 1; i <= n; i++) arr.push(fn(i));
-  return arr;
-}
-function makeLineNumbers(count) {
-  if (count <= 0) return '1';
-  return repeat(count, i => i).join('\n');
-}
-function safeSplitLines(text) {
-  if (text === '') return [''];
-  return text.split('\n');
-}
-
-/* ===== formatters (VS Code style) ===== */
+/* -------------------------
+   Simple VSCode-style formatters
+   (unchanged logic)
+   ------------------------- */
 function formatHTML(input) {
   if (!input) return '';
   const tab = '  ';
   let indent = 0;
   const prepared = input.replace(/>\s+</g, '><').replace(/</g, '~::~<');
-  const parts = prepared.split('~::~');
-  const out = parts.map((line) => {
+  return prepared.split('~::~').map(line => {
     line = line.trim();
     if (!line) return '';
     if (/^<\/\w/.test(line)) indent = Math.max(0, indent - 1);
     const pad = tab.repeat(indent);
     if (/^<\w[^>]*[^\/]>$/.test(line) && !line.includes('</')) {
-      const res = pad + line;
-      indent++;
-      return res;
+      const res = pad + line; indent++; return res;
     }
     return pad + line;
-  }).filter(Boolean).join('\n');
-  return out.trim();
+  }).filter(Boolean).join('\n').trim();
 }
 function formatCSS(input) {
   if (!input) return '';
-  const tab = '  ';
-  let indent = 0, formatted = '';
+  const tab = '  '; let indent = 0, formatted = '';
   input = input.replace(/\s*([\{\};])\s*/g, '$1').replace(/\s+/g, ' ').trim();
-  for (let i = 0; i < input.length; i++) {
+  for (let i = 0; i < input.length; i++){
     const ch = input[i];
     if (ch === '{') { formatted = formatted.trimEnd() + ' {\n'; indent++; formatted += tab.repeat(indent); }
     else if (ch === '}') { indent = Math.max(0, indent - 1); formatted = formatted.trimEnd() + '\n' + tab.repeat(indent) + '}\n' + tab.repeat(indent); }
@@ -247,13 +165,11 @@ function formatCSS(input) {
 }
 function formatJS(input) {
   if (!input) return '';
-  const tab = '  ';
-  let indent = 0, out = '';
+  const tab = '  '; let indent = 0, out = '';
   input = input.replace(/\s+/g, ' ').trim();
   let inString = false, strChar = '';
-  for (let i = 0; i < input.length; i++) {
-    const ch = input[i];
-    const prev = input[i - 1];
+  for (let i = 0; i < input.length; i++){
+    const ch = input[i], prev = input[i-1];
     if (!inString && (ch === '"' || ch === "'" || ch === '`')) { inString = true; strChar = ch; out += ch; continue; }
     if (inString) { out += ch; if (ch === strChar && prev !== '\\') inString = false; continue; }
     if (ch === '{') { out = out.trimEnd() + ' {\n' + tab.repeat(++indent); continue; }
@@ -264,75 +180,65 @@ function formatJS(input) {
   return out.trim();
 }
 
-/* ===== line number & sizing sync ===== */
-function updateLineNumbersForTextarea() {
+/* -------------------------
+   Line numbers generation
+   - create text with newlines (1\n2\n...n)
+   - DO NOT set gutter element height via JS
+   - rely on CSS flex/stretch and overflow scroll syncing
+   ------------------------- */
+function makeLineNumbers(count){
+  if (count <= 0) return '1';
+  let parts = [];
+  for (let i = 1; i <= count; i++) parts.push(i);
+  return parts.join('\n');
+}
+function updateInputLineNumbers(){
   const val = inputArea.value || '';
-  const lines = safeSplitLines(val);
-  inputLines.textContent = makeLineNumbers(lines.length || 1);
-  // ensure gutter height matches textarea visible area
-  syncGutterHeight(gutterInput, inputArea);
+  const count = val === '' ? 1 : val.split('\n').length;
+  inputLines.textContent = makeLineNumbers(count);
 }
-function updateLineNumbersForOutput() {
+function updateOutputLineNumbers(){
   const val = output.textContent || '';
-  const lines = safeSplitLines(val);
-  outputLines.textContent = makeLineNumbers(lines.length || 1);
-  syncGutterHeight(gutterOutput, output);
+  const count = val === '' ? 1 : val.split('\n').length;
+  outputLines.textContent = makeLineNumbers(count);
 }
 
-function syncGutterHeight(gutterElem, contentElem) {
-  // set gutter scrollHeight to match content's scrollHeight so visible lines align.
-  // Use clientHeight to match visible area rather than full scroll height.
-  const h = contentElem.clientHeight;
-  // apply same height so gutter lines wrap/align visually
-  gutterElem.style.height = h + 'px';
-  // keep gutters scrollTop in sync when user scrolls content (handlers below)
-}
-
-/* Resize Observer: when textarea height changes (user resizes or keyboard), sync gutter */
-let resizeObserver;
-function setupResizeSync() {
-  if ('ResizeObserver' in window) {
-    resizeObserver = new ResizeObserver(() => {
-      updateLineNumbersForTextarea();
-      updateLineNumbersForOutput();
-    });
-    resizeObserver.observe(inputArea);
-    resizeObserver.observe(output);
-  } else {
-    // fallback: on window resize recalc
-    window.addEventListener('resize', () => {
-      updateLineNumbersForTextarea();
-      updateLineNumbersForOutput();
-    });
-  }
-}
-
-/* ===== events: scroll sync & input handling ===== */
-inputArea.addEventListener('input', () => {
-  storageRaw[currentTab] = inputArea.value;
-  updateLineNumbersForTextarea();
-});
-
-// scroll sync: textarea <-> gutterInput
+/* -------------------------
+   Scroll sync (only set scrollTop)
+   - when content scrolls, match gutter scrollTop
+   - when gutter scrolls, match content scrollTop (preview gutter)
+   ------------------------- */
 inputArea.addEventListener('scroll', () => {
   gutterInput.scrollTop = inputArea.scrollTop;
 });
-// preview scroll
+gutterInput.addEventListener('scroll', () => {
+  // keep user able to scroll gutter -> textarea
+  inputArea.scrollTop = gutterInput.scrollTop;
+});
+
 output.addEventListener('scroll', () => {
   gutterOutput.scrollTop = output.scrollTop;
 });
 gutterOutput.addEventListener('scroll', () => {
   output.scrollTop = gutterOutput.scrollTop;
 });
-// allow clicking gutter to focus textarea (UX)
-gutterInput.addEventListener('click', () => inputArea.focus());
 
-/* ===== buttons ===== */
+/* -------------------------
+   Input events
+   ------------------------- */
+inputArea.addEventListener('input', () => {
+  storageRaw[currentTab] = inputArea.value;
+  updateInputLineNumbers();
+});
+
+/* -------------------------
+   Buttons
+   ------------------------- */
 document.getElementById('btnFormat').addEventListener('click', () => {
   const raw = storageRaw[currentTab] !== undefined ? storageRaw[currentTab] : inputArea.value;
   if (!raw || !raw.trim()) {
     output.textContent = 'Tidak ada input.';
-    updateLineNumbersForOutput();
+    updateOutputLineNumbers();
     return;
   }
   let formatted = raw;
@@ -345,14 +251,13 @@ document.getElementById('btnFormat').addEventListener('click', () => {
   }
   storageFormatted[currentTab] = formatted;
   output.textContent = formatted;
-  updateLineNumbersForOutput();
-  // reset scroll to top for better UX
-  output.scrollTop = 0;
-  gutterOutput.scrollTop = 0;
+  updateOutputLineNumbers();
+  // scroll to top
+  output.scrollTop = 0; gutterOutput.scrollTop = 0;
 });
 
 document.getElementById('btnCopy').addEventListener('click', () => {
-  navigator.clipboard.writeText(output.textContent || '').then(() => alert('Hasil format disalin!'), (e) => alert('Gagal menyalin: ' + e));
+  navigator.clipboard.writeText(output.textContent || '').then(() => alert('Hasil format disalin!'), e => alert('Gagal menyalin: ' + e));
 });
 
 document.getElementById('btnDownload').addEventListener('click', () => {
@@ -365,43 +270,39 @@ document.getElementById('btnDownload').addEventListener('click', () => {
   URL.revokeObjectURL(a.href);
 });
 
-/* ===== tabs ===== */
+/* -------------------------
+   Tabs
+   ------------------------- */
 tabs.forEach(tab => {
   tab.addEventListener('click', () => {
     tabs.forEach(t => t.classList.remove('active'));
     tab.classList.add('active');
-    // save current raw content
+    // save raw
     storageRaw[currentTab] = inputArea.value;
     // switch
     currentTab = tab.dataset.type;
-    labelTitle.textContent = currentTab.toUpperCase();
-    // load raw content for this tab into textarea
+    document.getElementById('labelTitle').textContent = currentTab.toUpperCase();
     inputArea.value = storageRaw[currentTab] || '';
-    updateLineNumbersForTextarea();
-    // load formatted preview if present
+    updateInputLineNumbers();
     output.textContent = storageFormatted[currentTab] || 'Hasil format akan muncul di sini.';
-    updateLineNumbersForOutput();
-    // reset scrolls
-    inputArea.scrollTop = 0;
-    gutterInput.scrollTop = 0;
-    output.scrollTop = 0;
-    gutterOutput.scrollTop = 0;
+    updateOutputLineNumbers();
+    inputArea.scrollTop = 0; gutterInput.scrollTop = 0;
+    output.scrollTop = 0; gutterOutput.scrollTop = 0;
   });
 });
 
-/* ===== initialization ===== */
-(function init() {
-  // initial empty states
+/* -------------------------
+   Init
+   ------------------------- */
+(function init(){
   storageRaw.html = storageRaw.html || '';
   storageRaw.css = storageRaw.css || '';
   storageRaw.js = storageRaw.js || '';
   storageFormatted.html = storageFormatted.html || '';
   storageFormatted.css = storageFormatted.css || '';
   storageFormatted.js = storageFormatted.js || '';
-
-  updateLineNumbersForTextarea();
-  updateLineNumbersForOutput();
-  setupResizeSync();
+  updateInputLineNumbers();
+  updateOutputLineNumbers();
 })();
 </script>
 </body>
