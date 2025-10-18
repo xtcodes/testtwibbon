@@ -5,49 +5,44 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Processing</title>
 <style>
-body, html { margin:0; padding:0; font-family:Arial, sans-serif; height:100%; background:#fff; }
-#processing {
-  position:relative;
-  width:100%; height:100%;
-  display:flex; align-items:center; justify-content:center;
+body, html {
+  margin:0; padding:0; height:100%; width:100%; display:flex;
+  align-items:center; justify-content:center; font-family:Arial,sans-serif;
+  background:#fff;
 }
-#spinnerContainer {
-  position:relative;
-  width:50vw; height:50vw;
-  max-width:300px; max-height:300px; /* optional max size */
+#processingContainer {
+  position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center;
+}
+#spinnerWrapper {
+  position:relative; width:300px; height:300px; max-width:80vw; max-height:80vw;
 }
 .spinner {
-  position:absolute;
-  top:50%; left:50%;
-  width:100%; height:100%;
-  transform:translate(-50%, -50%);
+  position:absolute; top:0; left:0; width:100%; height:100%;
 }
 .spinner .circle {
   position:absolute; width:100%; height:100%;
-  border:6px solid transparent; border-top:6px solid #3498db;
-  border-radius:50%; animation:spin 1s linear infinite;
+  border:6px solid transparent; border-top:6px solid #3498db; border-radius:50%;
+  animation:spin 1s linear infinite;
 }
-.spinner .circle:nth-child(2) { border-top:6px solid #e74c3c; animation-direction:reverse; }
-@keyframes spin {0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+.spinner .circle:nth-child(2) {
+  border-top:6px solid #e74c3c; animation-direction:reverse;
+}
+@keyframes spin { 0%{transform:rotate(0deg);} 100%{transform:rotate(360deg);} }
 #userPhoto {
   position:absolute; top:50%; left:50%;
-  width:30%; height:30%;
-  max-width:150px; max-height:150px;
+  width:60%; height:60%;
   transform:translate(-50%, -50%);
-  border-radius:50%;
-  object-fit:cover;
-  z-index:2;
+  border-radius:50%; object-fit:cover; z-index:2;
 }
 #processTip {
-  margin-top:calc(50vw + 20px);
-  font-weight:bold; font-size:1.2rem; text-align:center;
+  margin-top:20px; font-size:1.2rem; font-weight:bold; text-align:center;
 }
 </style>
 </head>
 <body>
 
-<div id="processing">
-  <div id="spinnerContainer">
+<div id="processingContainer">
+  <div id="spinnerWrapper">
     <img id="userPhoto" src="" alt="User Photo">
     <div class="spinner">
       <div class="circle"></div>
@@ -74,7 +69,7 @@ const interval=setInterval(()=>{
   step++; if(step>totalSteps) step=1;
   if(Date.now()-startTime>=duration){
     clearInterval(interval);
-    window.location.href='../result/index.html';
+    window.location.href='result.html';
   }
 },intervalTime);
 </script>
