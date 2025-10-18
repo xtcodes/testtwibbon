@@ -5,45 +5,168 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PFP Twibbon</title>
 <style>
-  /* Loading screen full layar */
-  #loadingScreen {
-    position: fixed;
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+  }
+
+  /* Artikel singkat */
+  #article {
+    margin-bottom: 20px;
+  }
+
+  /* Drop area 1x1 */
+  #dropArea {
+    width: 100%;
+    max-width: 400px;
+    aspect-ratio: 1 / 1;
+    border: 2px dashed #aaa;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #888;
+    cursor: pointer;
+    margin-bottom: 20px;
+    transition: border-color 0.3s;
+  }
+  #dropArea.hover {
+    border-color: #555;
+  }
+
+  /* Proses loading */
+  #processing {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Lingkaran user foto */
+  #userPhoto {
+    width: 50%;
+    max-width: 150px;
+    border-radius: 50%;
+    position: relative;
+  }
+
+  /* Spinner 2 garis berlawanan */
+  .spinner {
+    position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2rem;
-    font-family: Arial, sans-serif;
-    z-index: 9999;
+  }
+  .line {
+    position: absolute;
+    width: 50%;
+    height: 4px;
+    background: #3498db;
+    top: 50%;
+    transform-origin: left center;
+    border-radius: 2px;
+    animation: spin 1s linear infinite;
+  }
+  .line:nth-child(2) {
+    animation-direction: reverse;
   }
 
-  /* Konten utama disembunyikan dulu */
-  #mainContent {
-    display: none;
+  @keyframes spin {
+    0% { transform: rotate(0deg) translateX(50%) rotate(0deg); }
+    100% { transform: rotate(360deg) translateX(50%) rotate(-360deg); }
+  }
+
+  /* Tip proses */
+  #processTip {
+    margin-top: 10px;
+    font-weight: bold;
   }
 </style>
 </head>
 <body>
 
-<!-- Loading Screen -->
-<div id="loadingScreen">Loading...</div>
+<!-- Artikel singkat -->
+<div id="article">
+  <h2>Proyek PFP Twibbon</h2>
+  <p>Proyek ini memungkinkan pengguna untuk membuat foto profil (PFP) dengan twibbon interaktif secara mudah dan cepat. Unggah gambar Anda, ikuti proses, dan hasil PFP siap digunakan.</p>
+</div>
 
-<!-- Konten utama -->
-<div id="mainContent">
-  <h1>Selamat datang di PFP Twibbon!</h1>
-  <p>Konten utama muncul setelah loading.</p>
+<!-- Drop area -->
+<div id="dropArea">Klik atau seret gambar di sini</div>
+<input type="file" id="fileInput" accept="image/*" style="display: none;">
+
+<!-- Proses loading -->
+<div id="processing">
+  <div style="position: relative;">
+    <img id="userPhoto" src="" alt="User Photo">
+    <div class="spinner">
+      <div class="line"></div>
+      <div class="line"></div>
+    </div>
+  </div>
+  <div id="processTip">1/5</div>
 </div>
 
 <script>
-  // Tampilkan konten utama setelah 10 detik
-  setTimeout(() => {
-    document.getElementById('loadingScreen').style.display = 'none';
-    document.getElementById('mainContent').style.display = 'block';
-  }, 10000); // 10000ms = 10 detik
+  const dropArea = document.getElementById('dropArea');
+  const fileInput = document.getElementById('fileInput');
+  const processing = document.getElementById('processing');
+  const userPhoto = document.getElementById('userPhoto');
+  const processTip = document.getElementById('processTip');
+
+  // Event klik dropArea
+  dropArea.addEventListener('click', () => fileInput.click());
+
+  // Drag & Drop effect
+  dropArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropArea.classList.add('hover');
+  });
+  dropArea.addEventListener('dragleave', () => dropArea.classList.remove('hover'));
+  dropArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropArea.classList.remove('hover');
+    const files = e.dataTransfer.files;
+    if (files.length) handleFile(files[0]);
+  });
+
+  // Event pilih file
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files.length) handleFile(fileInput.files[0]);
+  });
+
+  // Fungsi handle file
+  function handleFile(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      userPhoto.src = e.target.result;
+      dropArea.style.display = 'none';
+      processing.style.display = 'flex';
+      startProcessTip();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // Fungsi tip proses
+  function startProcessTip() {
+    let step = 1;
+    let repeat = 0;
+    const totalSteps = 5;
+    const maxRepeat = 3;
+    const interval = setInterval(() => {
+      processTip.textContent = `${step}/${totalSteps}`;
+      step++;
+      if (step > totalSteps) {
+        step = 1;
+        repeat++;
+        if (repeat >= maxRepeat) {
+          clearInterval(interval);
+          // Bisa lanjut ke proses berikutnya atau tampilkan hasil
+        }
+      }
+    }, 800); // tiap 0.8 detik berubah tip
+  }
 </script>
 
 </body>
