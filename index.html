@@ -5,110 +5,71 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PFP Twibbon</title>
 <style>
-  body, html {
-    margin: 0; padding: 0;
-    font-family: Arial, sans-serif;
-  }
+  body, html { margin:0; padding:0; font-family:Arial, sans-serif; }
 
   /* Loading awal */
   #loadingScreen {
-    position: fixed;
-    top:0; left:0; width:100%; height:100%;
-    background:#fff;
-    display:flex; align-items:center; justify-content:center;
+    position:fixed; top:0; left:0; width:100%; height:100%;
+    background:#fff; display:flex; align-items:center; justify-content:center;
     font-size:2rem; z-index:9999;
   }
 
-  /* Main Content (Artikel + Drop Area) */
-  #mainContent {
-    display:none;
-    padding:20px;
-    text-align:center;
-  }
+  /* Main Content */
+  #mainContent { display:none; text-align:center; padding:20px; }
   #dropArea {
-    width:100%; max-width:400px;
-    aspect-ratio:1/1;
-    border:2px dashed #aaa;
-    border-radius:12px;
-    margin:20px auto;
+    width:100%; max-width:400px; aspect-ratio:1/1;
+    border:2px dashed #aaa; border-radius:12px; margin:20px auto;
     display:flex; align-items:center; justify-content:center;
-    color:#888; cursor:pointer;
-    transition:border-color 0.3s;
+    color:#888; cursor:pointer; transition:border-color 0.3s;
   }
   #dropArea.hover { border-color:#555; }
 
-  /* Proses Upload / Loading Gambar */
+  /* Processing */
   #processing {
-    display:none;
-    position:fixed; top:0; left:0; width:100%; height:100%;
-    background:#fff;
-    display:flex; flex-direction:column;
-    align-items:center; justify-content:center;
+    display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+    background:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center;
     z-index:9999;
   }
-  #userPhoto {
-    width:150px; height:150px;
-    border-radius:50%;
-    object-fit:cover;
-    position:relative; z-index:2;
-  }
+  #userPhoto { width:150px; height:150px; border-radius:50%; object-fit:cover; position:relative; z-index:2; }
   .spinner {
-    position:absolute; width:200px; height:200px;
-    top:50%; left:50%; transform:translate(-50%, -50%);
+    position:absolute; width:200px; height:200px; top:50%; left:50%; transform:translate(-50%,-50%);
   }
   .spinner .circle {
     position:absolute; width:100%; height:100%;
-    border:6px solid transparent;
-    border-top:6px solid #3498db;
-    border-radius:50%;
-    animation:spin 1s linear infinite;
+    border:6px solid transparent; border-top:6px solid #3498db;
+    border-radius:50%; animation:spin 1s linear infinite;
   }
   .spinner .circle:nth-child(2) {
-    border-top:6px solid #e74c3c;
-    animation-direction:reverse;
+    border-top:6px solid #e74c3c; animation-direction:reverse;
   }
-  @keyframes spin { 0% { transform:rotate(0deg); } 100% { transform:rotate(360deg); } }
+  @keyframes spin {0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+  #processTip { margin-top:220px; font-weight:bold; font-size:1.2rem; }
 
-  #processTip {
-    margin-top:220px;
-    font-weight:bold; font-size:1.2rem;
-  }
-
-  /* Result */
+  /* Result dengan canvas */
   #resultScreen {
-    display:none;
-    position:fixed; top:0; left:0; width:100%; height:100%;
-    background:#fff;
-    display:flex; flex-direction:column;
-    align-items:center; justify-content:center;
+    display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+    background:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center;
   }
-  #finalImage {
-    width:200px; height:200px;
-    border-radius:50%; object-fit:cover;
-    position:relative;
-  }
-  #downloadBtn {
-    margin-top:20px; padding:10px 20px; font-size:1rem;
-    cursor:pointer;
-  }
+  #canvas { border-radius:50%; }
+  #downloadBtn { margin-top:20px; padding:10px 20px; font-size:1rem; cursor:pointer; }
 </style>
 </head>
 <body>
 
-<!-- Loading Awal -->
+<!-- Loading awal -->
 <div id="loadingScreen">Loading...</div>
 
 <!-- Main Content -->
 <div id="mainContent">
   <div id="article">
     <h2>Proyek PFP Twibbon</h2>
-    <p>Unggah gambar Anda untuk membuat PFP dengan twibbon interaktif. Proses akan berjalan beberapa detik.</p>
+    <p>Unggah gambar Anda untuk membuat PFP dengan twibbon interaktif.</p>
   </div>
   <div id="dropArea">Klik atau seret gambar di sini</div>
   <input type="file" id="fileInput" accept="image/*" style="display:none;">
 </div>
 
-<!-- Proses Upload -->
+<!-- Processing -->
 <div id="processing">
   <img id="userPhoto" src="" alt="User Photo">
   <div class="spinner">
@@ -118,9 +79,9 @@
   <div id="processTip">1/5</div>
 </div>
 
-<!-- Result Screen -->
+<!-- Result -->
 <div id="resultScreen">
-  <img id="finalImage" src="" alt="Twibbon Result">
+  <canvas id="canvas" width="200" height="200"></canvas>
   <button id="downloadBtn">Download PFP</button>
 </div>
 
@@ -133,8 +94,12 @@ const processing = document.getElementById('processing');
 const userPhoto = document.getElementById('userPhoto');
 const processTip = document.getElementById('processTip');
 const resultScreen = document.getElementById('resultScreen');
-const finalImage = document.getElementById('finalImage');
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
 const downloadBtn = document.getElementById('downloadBtn');
+
+// Twibbon default (gunakan URL atau lokal)
+const twibbonURL = 'https://i.ibb.co/7v3h1tW/twibbon.png'; // contoh twibbon transparan PNG
 
 // Loading awal 10 detik
 setTimeout(()=>{
@@ -167,13 +132,12 @@ function handleFile(file){
 function startProcessTip(imageSrc){
   let step=1;
   const totalSteps=5;
-  const duration=10000; // 10 detik
+  const duration=10000;
   const intervalTime=duration/(totalSteps*2); // repeat ~2x
   const startTime=Date.now();
   const interval=setInterval(()=>{
     processTip.textContent=`${step}/${totalSteps}`;
-    step++;
-    if(step>totalSteps) step=1;
+    step++; if(step>totalSteps) step=1;
     if(Date.now()-startTime>=duration){
       clearInterval(interval);
       showResult(imageSrc);
@@ -181,18 +145,39 @@ function startProcessTip(imageSrc){
   },intervalTime);
 }
 
-// Tampilkan hasil PFP + Twibbon default
+// Gabungkan user + twibbon di canvas
 function showResult(imageSrc){
   processing.style.display='none';
   resultScreen.style.display='flex';
-  // Simpel gabungkan user + twibbon
-  finalImage.src=imageSrc; // nanti bisa overlay twibbon
+  const img = new Image();
+  const twibbon = new Image();
+  let loaded = 0;
+  img.onload = checkLoad; twibbon.onload = checkLoad;
+  img.src = imageSrc;
+  twibbon.src = twibbonURL;
+  function checkLoad(){
+    loaded++;
+    if(loaded<2) return;
+    // Resize canvas sesuai
+    canvas.width=img.width; canvas.height=img.height;
+    // Draw user
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(canvas.width/2,canvas.height/2,canvas.width/2,0,Math.PI*2);
+    ctx.closePath();
+    ctx.clip();
+    ctx.drawImage(img,0,0,canvas.width,canvas.height);
+    ctx.restore();
+    // Draw twibbon overlay
+    ctx.drawImage(twibbon,0,0,canvas.width,canvas.height);
+  }
 }
 
-// Download tombol
+// Download
 downloadBtn.addEventListener('click',()=>{
   const link=document.createElement('a');
-  link.href=finalImage.src;
+  link.href=canvas.toDataURL('image/png');
   link.download='twibbon_pfp.png';
   link.click();
 });
