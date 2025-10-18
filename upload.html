@@ -6,13 +6,14 @@
 <title>Processing</title>
 <style>
 body, html {
-  margin:0; padding:0; height:100%; width:100%; display:flex;
-  align-items:center; justify-content:center; font-family:Arial,sans-serif;
-  background:#fff;
-  overflow: hidden;
+  margin:0; padding:0; height:100%; width:100%;
+  font-family:Arial,sans-serif; background:#fff;
+  overflow:hidden; /* hilangkan scroll */
+  display:flex; align-items:center; justify-content:center;
 }
 #processingContainer {
   position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  opacity:0; transition:opacity 0.5s;
 }
 #spinnerWrapper {
   position:relative; width:300px; height:300px; max-width:80vw; max-height:80vw;
@@ -25,19 +26,15 @@ body, html {
   border:6px solid transparent; border-top:6px solid #3498db; border-radius:50%;
   animation:spin 1s linear infinite;
 }
-.spinner .circle:nth-child(2) {
-  border-top:6px solid #e74c3c; animation-direction:reverse;
-}
-@keyframes spin { 0%{transform:rotate(0deg);} 100%{transform:rotate(360deg);} }
+.spinner .circle:nth-child(2) { border-top:6px solid #e74c3c; animation-direction:reverse; }
+@keyframes spin {0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
 #userPhoto {
   position:absolute; top:50%; left:50%;
   width:60%; height:60%;
   transform:translate(-50%, -50%);
   border-radius:50%; object-fit:cover; z-index:2;
 }
-#processTip {
-  margin-top:20px; font-size:1.2rem; font-weight:bold; text-align:center;
-}
+#processTip { margin-top:20px; font-size:1.2rem; font-weight:bold; text-align:center; }
 </style>
 </head>
 <body>
@@ -54,12 +51,16 @@ body, html {
 </div>
 
 <script>
+const processingContainer = document.getElementById('processingContainer');
 const userPhoto = document.getElementById('userPhoto');
 const processTip = document.getElementById('processTip');
 const userImage = localStorage.getItem('userImage');
 
 if(!userImage){ window.location.href='../index.html'; }
 userPhoto.src = userImage;
+
+// Fade-in container
+setTimeout(()=>processingContainer.style.opacity=1,50);
 
 // Proses tip 1/5 repeat 10 detik
 let step=1; const totalSteps=5; const duration=10000;
@@ -70,7 +71,9 @@ const interval=setInterval(()=>{
   step++; if(step>totalSteps) step=1;
   if(Date.now()-startTime>=duration){
     clearInterval(interval);
-    window.location.href='result.html';
+    // Fade-out sebelum ke result
+    processingContainer.style.opacity=0;
+    setTimeout(()=>window.location.href='result.html',500);
   }
 },intervalTime);
 </script>
