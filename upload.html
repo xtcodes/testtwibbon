@@ -8,20 +8,20 @@
 body, html {
   margin:0; padding:0; height:100%; width:100%;
   font-family:Arial,sans-serif; background:#fff;
-  overflow:hidden;
-  display:flex; align-items:center; justify-content:center;
+  overflow:hidden; display:flex; align-items:center; justify-content:center;
 }
 
 #processingContainer {
   position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center;
   opacity:0; transition:opacity 0.5s;
+  backdrop-filter:blur(0px); /* blur aktif saat proses */
 }
 
 #spinnerWrapper {
   position:relative; width:300px; height:300px; max-width:80vw; max-height:80vw;
 }
 
-/* Spinner Merah (atas setengah lingkaran) */
+/* Spinner Atas Merah */
 .spinnerTop {
   position:absolute; top:0; left:50%; width:150px; height:150px;
   transform:translateX(-50%);
@@ -34,7 +34,7 @@ body, html {
   animation:spinTop 1s linear infinite;
 }
 
-/* Spinner Biru (bawah setengah lingkaran) */
+/* Spinner Bawah Biru */
 .spinnerBottom {
   position:absolute; bottom:0; left:50%; width:150px; height:150px;
   transform:translateX(-50%);
@@ -47,40 +47,31 @@ body, html {
   animation:spinBottom 1s linear infinite;
 }
 
-@keyframes spinTop {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-@keyframes spinBottom {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(-360deg); }
-}
+@keyframes spinTop { 0%{transform:rotate(0deg);} 100%{transform:rotate(360deg);} }
+@keyframes spinBottom { 0%{transform:rotate(0deg);} 100%{transform:rotate(-360deg);} }
 
 #userPhoto {
   position:absolute; top:50%; left:50%;
   width:60%; height:60%;
   transform:translate(-50%, -50%);
   border-radius:50%; object-fit:cover; z-index:2;
+  box-shadow:0 0 15px rgba(0,0,0,0.2);
 }
 
 #processTip {
   margin-top:20px; font-size:1.2rem; font-weight:bold; text-align:center;
 }
+
 </style>
 </head>
 <body>
 
 <div id="processingContainer">
   <div id="spinnerWrapper">
-    <!-- Foto User di Tengah -->
     <img id="userPhoto" src="" alt="User Photo">
-
-    <!-- Spinner Atas -->
     <div class="spinnerTop">
       <div class="circle"></div>
     </div>
-
-    <!-- Spinner Bawah -->
     <div class="spinnerBottom">
       <div class="circle"></div>
     </div>
@@ -89,28 +80,32 @@ body, html {
 </div>
 
 <script>
-const processingContainer = document.getElementById('processingContainer');
+const container = document.getElementById('processingContainer');
 const userPhoto = document.getElementById('userPhoto');
-const processTip = document.getElementById('processTip');
+const tip = document.getElementById('processTip');
 const userImage = localStorage.getItem('userImage');
 
-if(!userImage){ window.location.href='/'; }
+if(!userImage){ window.location.href='../index.html'; }
 userPhoto.src = userImage;
 
-// Fade-in container
-setTimeout(()=>processingContainer.style.opacity=1,50);
+// Fade-in container + blur background
+setTimeout(()=>{
+  container.style.opacity=1;
+  container.style.backdropFilter='blur(5px)';
+},50);
 
-// Proses tip 1/5 repeat 10 detik
-let step=1; const totalSteps=5; const duration=10000;
-const intervalTime = duration/(totalSteps*2);
+// Tip proses 1/5 repeat 10 detik
+let step=1; const total=5; const duration=10000;
+const intervalTime = duration/(total*2);
 const startTime=Date.now();
 const interval=setInterval(()=>{
-  processTip.textContent=`${step}/${totalSteps}`;
-  step++; if(step>totalSteps) step=1;
+  tip.textContent=`${step}/${total}`;
+  step++; if(step>total) step=1;
   if(Date.now()-startTime>=duration){
     clearInterval(interval);
-    processingContainer.style.opacity=0;
-    setTimeout(()=>window.location.href='result.html',500);
+    container.style.opacity=0;
+    container.style.backdropFilter='blur(0px)';
+    setTimeout(()=>window.location.href='../result/index.html',500);
   }
 },intervalTime);
 </script>
