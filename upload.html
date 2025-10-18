@@ -87,7 +87,7 @@ const userPhoto = document.getElementById('userPhoto');
 const tip = document.getElementById('processTip');
 const userImage = localStorage.getItem('userImage');
 
-if(!userImage){ window.location.href='../index.html'; }
+if(!userImage){ window.location.href='/'; }
 userPhoto.src = userImage;
 
 // Fade-in container
@@ -103,7 +103,7 @@ const interval = setInterval(()=>{
   if(Date.now()-startTime >= duration){
     clearInterval(interval);
     container.style.opacity=0;
-    setTimeout(()=>window.location.href='../result/index.html',500);
+    setTimeout(()=>window.location.href='result.html',500);
   }
 },intervalTime);
 </script>
