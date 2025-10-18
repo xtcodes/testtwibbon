@@ -74,11 +74,14 @@
       color: var(--gutter-text);
       line-height: 1.45;
       text-align: right;
-      overflow: hidden;
+      overflow: auto;            /* <-- ubah dari hidden ke auto agar bisa scroll */
     }
     .gutter .lines {
-      /* make scroll syncable */
+      white-space: pre;          /* <-- penting: pertahankan newline */
+      line-height: 1.45;         /* <-- samakan dengan textarea/pre */
+      margin: 0;
     }
+
     textarea {
       width: 100%;
       min-height: 180px;
