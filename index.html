@@ -82,6 +82,11 @@ textarea {
   overflow: auto;
   white-space: pre;
 }
+.editor-buttons {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+}
 button {
   background: #0078d4;
   color: white;
@@ -90,8 +95,6 @@ button {
   padding: 8px 12px;
   cursor: pointer;
   font-size: 14px;
-  margin: 10px;
-  align-self: flex-start;
   transition: background 0.2s;
 }
 button:hover {
@@ -116,7 +119,11 @@ button:hover {
     <textarea id="codeInput" placeholder="// Tulis kode di sini..."></textarea>
   </div>
 
-  <button id="btnFormat">Format</button>
+  <div class="editor-buttons">
+    <button id="btnFormat">Format</button>
+    <button id="btnCopy">Copy</button>
+    <button id="btnDownload">Download</button>
+  </div>
 </div>
 
 <script>
@@ -124,6 +131,8 @@ let currentTab = "html";
 const codeInput = document.getElementById("codeInput");
 const lines = document.getElementById("lines");
 const btnFormat = document.getElementById("btnFormat");
+const btnCopy = document.getElementById("btnCopy");
+const btnDownload = document.getElementById("btnDownload");
 const tabs = document.querySelectorAll(".tab");
 const storage = { html: "", css: "", js: "" };
 
@@ -153,61 +162,30 @@ tabs.forEach(tab => {
   });
 });
 
-// --- FORMAT BUTTON ---
-btnFormat.addEventListener("click", () => {
-  let val = codeInput.value.trim();
-  if (!val) {
-    alert("Masukkan kode terlebih dahulu!");
-    return;
-  }
-
-  // ✅ VALIDASI
-  let isValid = true;
-  if (currentTab === "html" && !isValidHTML(val)) {
-    alert("Kode HTML tidak valid. Periksa kembali struktur tag!");
-    isValid = false;
-  } else if (currentTab === "css" && !isValidCSS(val)) {
-    alert("Kode CSS tidak valid. Pastikan ada { } dan titik koma (;)");
-    isValid = false;
-  } else if (currentTab === "js" && !isValidJS(val)) {
-    alert("Kode JavaScript tidak valid. Periksa kurung atau sintaks.");
-    isValid = false;
-  }
-  if (!isValid) return;
-
-  // ✅ FORMAT
-  let formatted = val;
-  if (currentTab === "html") formatted = formatHTML(val);
-  else if (currentTab === "css") formatted = formatCSS(val);
-  else if (currentTab === "js") formatted = formatJS(val);
-
-  codeInput.value = formatted;
-  updateLineNumbers();
-});
-
-// --- VALIDASI FUNGSI ---
+// --- VALIDASI ---
 function isValidHTML(code) {
   return /<[a-z][\s\S]*>/.test(code.toLowerCase());
 }
+
 function isValidCSS(code) {
-  return /^[^{]+\{[^}]+\}/m.test(code.trim());
+  const clean = code.replace(/\/\*[\s\S]*?\*\//g, '').trim();
+  const pattern = /^([.#]?[a-zA-Z][\w-]*\s*)+\{[^}]*\}/m;
+  return pattern.test(clean);
 }
+
 function isValidJS(code) {
-  try {
-    new Function(code);
-    return true;
-  } catch {
-    return false;
-  }
+  const keywords = ['function','const','let','var','if','for','return'];
+  const hasKeyword = keywords.some(k => new RegExp('\\b'+k+'\\b').test(code));
+  const hasCurly = /[\{\}]/.test(code);
+  return hasKeyword || hasCurly;
 }
 
 // --- FORMATTER ---
 function formatHTML(html) {
-  html = html.replace(/>\s+</g, "><"); // hilangkan spasi antar tag
+  html = html.replace(/>\s+</g, "><");
   const tokens = html.replace(/></g, ">\n<").split("\n");
   let indent = 0, result = "";
   const voidTags = ["area","base","br","col","embed","hr","img","input","link","meta","param","source","track","wbr"];
-  
   for (let line of tokens) {
     line = line.trim();
     if (/^<\/\w/.test(line)) indent--;
@@ -232,6 +210,41 @@ function formatJS(js) {
   js = js.replace(/\}/g, "\n}\n");
   return js.replace(/\n{2,}/g, "\n").trim();
 }
+
+// --- BUTTONS ---
+btnFormat.addEventListener("click", () => {
+  const code = codeInput.value.trim();
+  if (!code) { alert("Masukkan kode terlebih dahulu!"); return; }
+
+  // VALIDASI
+  let valid = true;
+  if (currentTab === "html" && !isValidHTML(code)) { alert("HTML tidak valid!"); valid = false; }
+  if (currentTab === "css" && !isValidCSS(code)) { alert("CSS tidak valid!"); valid = false; }
+  if (currentTab === "js" && !isValidJS(code)) { alert("JS tidak valid!"); valid = false; }
+  if (!valid) return;
+
+  // FORMAT
+  if (currentTab === "html") codeInput.value = formatHTML(code);
+  if (currentTab === "css") codeInput.value = formatCSS(code);
+  if (currentTab === "js") codeInput.value = formatJS(code);
+  updateLineNumbers();
+});
+
+btnCopy.addEventListener("click", () => {
+  codeInput.select();
+  document.execCommand("copy");
+  alert("Kode berhasil dicopy!");
+});
+
+btnDownload.addEventListener("click", () => {
+  const blob = new Blob([codeInput.value], { type: "text/plain" });
+  const a = document.createElement("a");
+  const ext = currentTab === "html" ? "html" : currentTab === "css" ? "css" : "js";
+  a.download = `code.${ext}`;
+  a.href = URL.createObjectURL(blob);
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
 </script>
 
 </body>
