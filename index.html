@@ -127,7 +127,7 @@ const btnFormat = document.getElementById("btnFormat");
 const tabs = document.querySelectorAll(".tab");
 const storage = { html: "", css: "", js: "" };
 
-// --- FUNGSI UTAMA ---
+// --- LINE NUMBER ---
 function updateLineNumbers() {
   const totalLines = (codeInput.value.trim() === "") ? 1 : codeInput.value.split("\n").length;
   lines.textContent = Array.from({length: totalLines}, (_, i) => i + 1).join("\n");
@@ -137,6 +137,7 @@ codeInput.addEventListener("input", updateLineNumbers);
 codeInput.addEventListener("scroll", updateLineNumbers);
 updateLineNumbers();
 
+// --- TAB SWITCH ---
 tabs.forEach(tab => {
   tab.addEventListener("click", () => {
     tabs.forEach(t => t.classList.remove("active"));
@@ -152,6 +153,7 @@ tabs.forEach(tab => {
   });
 });
 
+// --- FORMAT BUTTON ---
 btnFormat.addEventListener("click", () => {
   let val = codeInput.value.trim();
   if (!val) {
@@ -159,6 +161,21 @@ btnFormat.addEventListener("click", () => {
     return;
   }
 
+  // ✅ VALIDASI
+  let isValid = true;
+  if (currentTab === "html" && !isValidHTML(val)) {
+    alert("Kode HTML tidak valid. Periksa kembali struktur tag!");
+    isValid = false;
+  } else if (currentTab === "css" && !isValidCSS(val)) {
+    alert("Kode CSS tidak valid. Pastikan ada { } dan titik koma (;)");
+    isValid = false;
+  } else if (currentTab === "js" && !isValidJS(val)) {
+    alert("Kode JavaScript tidak valid. Periksa kurung atau sintaks.");
+    isValid = false;
+  }
+  if (!isValid) return;
+
+  // ✅ FORMAT
   let formatted = val;
   if (currentTab === "html") formatted = formatHTML(val);
   else if (currentTab === "css") formatted = formatCSS(val);
@@ -168,8 +185,23 @@ btnFormat.addEventListener("click", () => {
   updateLineNumbers();
 });
 
-// ---------------- FUNGSI FORMAT ----------------
+// --- VALIDASI FUNGSI ---
+function isValidHTML(code) {
+  return /<[a-z][\s\S]*>/.test(code.toLowerCase());
+}
+function isValidCSS(code) {
+  return /^[^{]+\{[^}]+\}/m.test(code.trim());
+}
+function isValidJS(code) {
+  try {
+    new Function(code);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
+// --- FORMATTER ---
 function formatHTML(html) {
   html = html.replace(/>\s+</g, "><"); // hilangkan spasi antar tag
   const tokens = html.replace(/></g, ">\n<").split("\n");
@@ -194,16 +226,11 @@ function formatCSS(css) {
 }
 
 function formatJS(js) {
-  try {
-    return js
-      .replace(/;/g, ";\n")
-      .replace(/\{/g, "{\n  ")
-      .replace(/\}/g, "\n}\n")
-      .replace(/\n{2,}/g, "\n")
-      .trim();
-  } catch {
-    return js;
-  }
+  js = js.replace(/\s+/g, " ").trim();
+  js = js.replace(/;/g, ";\n");
+  js = js.replace(/\{/g, " {\n  ");
+  js = js.replace(/\}/g, "\n}\n");
+  return js.replace(/\n{2,}/g, "\n").trim();
 }
 </script>
 
