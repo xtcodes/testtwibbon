@@ -42,7 +42,7 @@ body {
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 80%;    /* 80% dari #central-stack */
+    width: 80%;
     height: 80%;
     border-radius: 50%;
     overflow: hidden;
@@ -61,31 +61,26 @@ body {
 /* 5. Spinner Layer 1: Bingkai Statis */
 .spinner-frame {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
     border-radius: 50%;
-    border: 10% solid #cbd5e1; /* relatif terhadap ukuran container */
+    border: 10px solid #cbd5e1;
     box-sizing: border-box;
     z-index: 1;
 }
 
-/* 6. Spinner Layer 2: Lingkaran Berputar */
+/* 6. Spinner Layer 2: Dua Warna Setengah Lingkaran */
 .spinner-outer {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
     border-radius: 50%;
-    border: 10% solid transparent;
-    border-top: 10% solid #10b981;
+    background: conic-gradient(red 0deg 180deg, blue 180deg 360deg);
+    z-index: 2;
     animation: spin 1.5s linear infinite;
-    box-sizing: border-box;
-    z-index: 2; 
 }
 
+/* Animasi putar */
 @keyframes spin {
     0% { transform: rotate(0deg); } 
     100% { transform: rotate(360deg); }
@@ -102,7 +97,6 @@ h2 {
 
 #processing-tips {
     padding: 10px 20px;
-    border-radius: 8px;
     font-size: 0.95em; 
     font-weight: 500; 
     color: #4b5563;
