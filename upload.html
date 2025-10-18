@@ -14,16 +14,26 @@ body, html {
 #processingContainer {
   position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center;
   opacity:0; transition:opacity 0.5s;
-  backdrop-filter:blur(0px); /* blur aktif saat proses */
 }
 
 #spinnerWrapper {
-  position:relative; width:300px; height:300px; max-width:80vw; max-height:80vw;
+  position:relative; width:200px; height:200px; /* container spinner */
+  max-width:80vw; max-height:80vw;
+}
+
+/* Foto User di tengah */
+#userPhoto {
+  position:absolute; top:50%; left:50%;
+  width:60%; height:60%;
+  transform:translate(-50%, -50%);
+  border-radius:50%; object-fit:cover; z-index:2;
+  box-shadow:0 0 15px rgba(0,0,0,0.2);
 }
 
 /* Spinner Atas Merah */
 .spinnerTop {
-  position:absolute; top:0; left:50%; width:150px; height:150px;
+  position:absolute; top:0; left:50%;
+  width:140%; height:140%; /* lebih besar dari foto */
   transform:translateX(-50%);
 }
 .spinnerTop .circle {
@@ -36,7 +46,8 @@ body, html {
 
 /* Spinner Bawah Biru */
 .spinnerBottom {
-  position:absolute; bottom:0; left:50%; width:150px; height:150px;
+  position:absolute; bottom:0; left:50%;
+  width:140%; height:140%;
   transform:translateX(-50%);
 }
 .spinnerBottom .circle {
@@ -50,18 +61,9 @@ body, html {
 @keyframes spinTop { 0%{transform:rotate(0deg);} 100%{transform:rotate(360deg);} }
 @keyframes spinBottom { 0%{transform:rotate(0deg);} 100%{transform:rotate(-360deg);} }
 
-#userPhoto {
-  position:absolute; top:50%; left:50%;
-  width:60%; height:60%;
-  transform:translate(-50%, -50%);
-  border-radius:50%; object-fit:cover; z-index:2;
-  box-shadow:0 0 15px rgba(0,0,0,0.2);
-}
-
 #processTip {
   margin-top:20px; font-size:1.2rem; font-weight:bold; text-align:center;
 }
-
 </style>
 </head>
 <body>
@@ -85,13 +87,12 @@ const userPhoto = document.getElementById('userPhoto');
 const tip = document.getElementById('processTip');
 const userImage = localStorage.getItem('userImage');
 
-if(!userImage){ window.location.href='../index.html'; }
+if(!userImage){ window.location.href='/'; }
 userPhoto.src = userImage;
 
-// Fade-in container + blur background
+// Fade-in container
 setTimeout(()=>{
   container.style.opacity=1;
-  container.style.backdropFilter='blur(5px)';
 },50);
 
 // Tip proses 1/5 repeat 10 detik
@@ -104,8 +105,7 @@ const interval=setInterval(()=>{
   if(Date.now()-startTime>=duration){
     clearInterval(interval);
     container.style.opacity=0;
-    container.style.backdropFilter='blur(0px)';
-    setTimeout(()=>window.location.href='../result/index.html',500);
+    setTimeout(()=>window.location.href='result.html',500);
   }
 },intervalTime);
 </script>
