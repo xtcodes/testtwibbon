@@ -77,7 +77,7 @@ function sendToUpload(file){
   const reader = new FileReader();
   reader.onload = e=>{
     localStorage.setItem('userImage', e.target.result);
-    window.location.href = 'upload/index.html';
+    window.location.href = 'upload.html';
   };
   reader.readAsDataURL(file);
 }
