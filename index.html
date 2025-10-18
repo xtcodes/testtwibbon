@@ -168,8 +168,9 @@ function isValidHTML(code) {
 }
 
 function isValidCSS(code) {
+  // Hilangkan komentar
   const clean = code.replace(/\/\*[\s\S]*?\*\//g, '').trim();
-  const pattern = /^([.#]?[a-zA-Z][\w-]*\s*)+\{[^}]*\}/m;
+  const pattern = /^([a-zA-Z][\w-]*|[.#][\w-]+)\s*\{[^}]*\}/m;
   return pattern.test(clean);
 }
 
