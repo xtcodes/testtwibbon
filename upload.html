@@ -3,63 +3,67 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Processing</title>
+<title>Upload Processing</title>
 <style>
 body, html {
-  margin:0; padding:0; height:100%; width:100%;
-  font-family:Arial,sans-serif; background:#fff;
-  overflow:hidden; display:flex; align-items:center; justify-content:center;
+  margin:0; padding:0; width:100%; height:100%;
+  display:flex; align-items:center; justify-content:center;
+  background:#fff; overflow:hidden; font-family:Arial,sans-serif;
 }
 
 #processingContainer {
-  position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  position:relative;
+  display:flex; flex-direction:column; align-items:center;
+  justify-content:center;
   opacity:0; transition:opacity 0.5s;
 }
 
 #spinnerWrapper {
-  position:relative; width:200px; height:200px; /* container spinner */
-  max-width:80vw; max-height:80vw;
+  position:relative;
+  width:200px; height:200px; max-width:80vw; max-height:80vw;
 }
 
-/* Foto User di tengah */
+/* Foto user di tengah */
 #userPhoto {
-  position:absolute; top:50%; left:50%;
+  position:absolute;
+  top:50%; left:50%;
   width:60%; height:60%;
   transform:translate(-50%, -50%);
-  border-radius:50%; object-fit:cover; z-index:2;
+  border-radius:50%;
+  object-fit:cover;
+  z-index:2;
   box-shadow:0 0 15px rgba(0,0,0,0.2);
 }
 
-/* Spinner Atas Merah */
-.spinnerTop {
-  position:absolute; top:0; left:50%;
-  width:140%; height:140%; /* lebih besar dari foto */
-  transform:translateX(-50%);
+/* Spinner Top Merah */
+.spinnerTop, .spinnerBottom {
+  position:absolute;
+  top:0; left:0; width:100%; height:100%;
+}
+.spinnerTop .circle, .spinnerBottom .circle {
+  width:100%; height:100%;
+  border:6px solid transparent;
+  border-radius:50%;
+  position:absolute; top:0; left:0;
+  box-sizing:border-box;
 }
 .spinnerTop .circle {
-  width:100%; height:100%;
-  border:6px solid transparent;
   border-top:6px solid #e74c3c;
-  border-radius:50%;
   animation:spinTop 1s linear infinite;
 }
-
-/* Spinner Bawah Biru */
-.spinnerBottom {
-  position:absolute; bottom:0; left:50%;
-  width:140%; height:140%;
-  transform:translateX(-50%);
-}
 .spinnerBottom .circle {
-  width:100%; height:100%;
-  border:6px solid transparent;
   border-bottom:6px solid #3498db;
-  border-radius:50%;
   animation:spinBottom 1s linear infinite;
 }
 
-@keyframes spinTop { 0%{transform:rotate(0deg);} 100%{transform:rotate(360deg);} }
-@keyframes spinBottom { 0%{transform:rotate(0deg);} 100%{transform:rotate(-360deg);} }
+@keyframes spinTop {
+  0% { transform:rotate(0deg); }
+  100% { transform:rotate(360deg); }
+}
+@keyframes spinBottom {
+  0% { transform:rotate(0deg); }
+  100% { transform:rotate(-360deg); }
+}
 
 #processTip {
   margin-top:20px; font-size:1.2rem; font-weight:bold; text-align:center;
@@ -71,12 +75,8 @@ body, html {
 <div id="processingContainer">
   <div id="spinnerWrapper">
     <img id="userPhoto" src="" alt="User Photo">
-    <div class="spinnerTop">
-      <div class="circle"></div>
-    </div>
-    <div class="spinnerBottom">
-      <div class="circle"></div>
-    </div>
+    <div class="spinnerTop"><div class="circle"></div></div>
+    <div class="spinnerBottom"><div class="circle"></div></div>
   </div>
   <div id="processTip">1/5</div>
 </div>
@@ -87,25 +87,23 @@ const userPhoto = document.getElementById('userPhoto');
 const tip = document.getElementById('processTip');
 const userImage = localStorage.getItem('userImage');
 
-if(!userImage){ window.location.href='/'; }
+if(!userImage){ window.location.href='../index.html'; }
 userPhoto.src = userImage;
 
 // Fade-in container
-setTimeout(()=>{
-  container.style.opacity=1;
-},50);
+setTimeout(()=>{ container.style.opacity=1; },50);
 
 // Tip proses 1/5 repeat 10 detik
-let step=1; const total=5; const duration=10000;
+let step=1, total=5, duration=10000;
 const intervalTime = duration/(total*2);
-const startTime=Date.now();
-const interval=setInterval(()=>{
+const startTime = Date.now();
+const interval = setInterval(()=>{
   tip.textContent=`${step}/${total}`;
   step++; if(step>total) step=1;
-  if(Date.now()-startTime>=duration){
+  if(Date.now()-startTime >= duration){
     clearInterval(interval);
     container.style.opacity=0;
-    setTimeout(()=>window.location.href='result.html',500);
+    setTimeout(()=>window.location.href='../result/index.html',500);
   }
 },intervalTime);
 </script>
