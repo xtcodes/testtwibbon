@@ -1,80 +1,108 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Formatter HTML • CSS • JS</title>
 <style>
-:root {
-  --bg: #f7f8fa;
-  --text: #222;
-  --border: #ddd;
-  --muted: #777;
-  --accent: #0078d4;
-  --editor-bg: #ffffff;
-}
-*{box-sizing:border-box}
-body{
+body {
   font-family: monospace;
-  background: var(--bg);
-  color: var(--text);
-  display:flex;
-  justify-content:center;
-  align-items:flex-start;
-  padding:20px;
-  height:100vh;
-  margin:0;
+  background: #fafafa;
+  color: #222;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 20px;
+  height: 100vh;
+  margin: 0;
 }
-.editor{
-  width:100%;
-  max-width:800px;
-  background:var(--editor-bg);
-  border:1px solid var(--border);
-  border-radius:6px;
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
-  box-shadow:0 2px 4px rgba(0,0,0,0.05);
+.editor {
+  width: 100%;
+  max-width: 800px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
-.editor-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  background:#fafafa;
-  padding:10px;
-  font-size:14px;
-  border-bottom:1px solid var(--border);
+.editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f0f0f0;
+  padding: 10px;
+  font-size: 14px;
+  border-bottom: 1px solid #ddd;
 }
-.tabs{display:flex;gap:6px}
-.tab{
-  padding:5px 10px;border-radius:4px;cursor:pointer;color:var(--muted);border:1px solid transparent;
+.tabs {
+  display: flex;
+  gap: 6px;
 }
-.tab.active{color:white;background:var(--accent);border-color:var(--accent)}
-.editor-body{
-  display:flex;
-  height:70vh;
-  position:relative;
-  background:var(--editor-bg);
+.tab {
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #777;
+  border: 1px solid transparent;
 }
-.line-numbers{
-  background:#f0f0f0;color:#999;text-align:right;padding:8px 5px;user-select:none;overflow:hidden;white-space:pre;border-right:1px solid var(--border);min-width:40px;
+.tab.active {
+  background: #0078d4;
+  color: white;
+  border-color: #0078d4;
 }
-textarea{
-  flex:1;background:transparent;color:var(--text);border:none;resize:vertical;outline:none;padding:8px 10px;font-size:14px;font-family:monospace;line-height:1.4;overflow:auto;white-space:pre;
+.editor-body {
+  display: flex;
+  height: 70vh;
+  position: relative;
 }
-button{
-  background:var(--accent);color:white;border:none;border-radius:4px;padding:6px 12px;cursor:pointer;font-size:14px;margin:10px;align-self:flex-start;
+.line-numbers {
+  background: #f8f8f8;
+  color: #999;
+  text-align: right;
+  padding: 8px 5px;
+  user-select: none;
+  overflow: hidden;
+  white-space: pre;
+  border-right: 1px solid #ddd;
+  min-width: 40px;
 }
-button:hover{background:#0a6ec5}
-@media (max-width:600px){
-  .line-numbers{min-width:30px;font-size:12px}
+textarea {
+  flex: 1;
+  background: white;
+  color: #222;
+  border: none;
+  resize: vertical;
+  outline: none;
+  padding: 8px 10px;
+  font-size: 14px;
+  font-family: monospace;
+  line-height: 1.4;
+  overflow: auto;
+  white-space: pre;
+}
+button {
+  background: #0078d4;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  margin: 10px;
+  align-self: flex-start;
+}
+button:hover {
+  background: #0a6ec5;
 }
 </style>
 </head>
 <body>
+
 <div class="editor">
   <div class="editor-header">
-    <span>Formatter VSCode Style</span>
+    <span><b>Formatter VSCode Style</b></span>
     <div class="tabs">
       <div class="tab active" data-type="html">HTML</div>
       <div class="tab" data-type="css">CSS</div>
@@ -84,220 +112,92 @@ button:hover{background:#0a6ec5}
 
   <div class="editor-body">
     <div class="line-numbers" id="lines">1</div>
-    <textarea id="codeInput" placeholder="Tulis kode di sini..."></textarea>
+    <textarea id="codeInput" placeholder="// Tulis kode di sini..."></textarea>
   </div>
 
   <button id="btnFormat">Format</button>
 </div>
 
 <script>
-/* state */
 let currentTab = "html";
 const codeInput = document.getElementById("codeInput");
 const lines = document.getElementById("lines");
 const btnFormat = document.getElementById("btnFormat");
 const tabs = document.querySelectorAll(".tab");
+const storage = { html: "", css: "", js: "" };
 
-/* utils */
 function updateLineNumbers() {
   const totalLines = (codeInput.value === "") ? 1 : codeInput.value.split("\n").length;
-  lines.textContent = Array.from({ length: totalLines }, (_, i) => i + 1).join("\n");
+  lines.textContent = Array.from({length: totalLines}, (_, i) => i + 1).join("\n");
 }
 codeInput.addEventListener("input", updateLineNumbers);
-codeInput.addEventListener("scroll", () => { lines.scrollTop = codeInput.scrollTop; });
+codeInput.addEventListener("scroll", () => lines.scrollTop = codeInput.scrollTop);
 updateLineNumbers();
 
-/* keep per-tab content */
-const storageRaw = { html: "", css: "", js: "" };
-
-/* set active tab */
 tabs.forEach(tab => {
   tab.addEventListener("click", () => {
     tabs.forEach(t => t.classList.remove("active"));
     tab.classList.add("active");
-    // save current edit
-    storageRaw[currentTab] = codeInput.value;
+    storage[currentTab] = codeInput.value;
     currentTab = tab.dataset.type;
-    // load saved raw content for new tab
-    codeInput.value = storageRaw[currentTab] || "";
-    // ensure editable mode when switching
-    codeInput.removeAttribute("readonly");
-    btnFormat.textContent = "Format";
+    codeInput.value = storage[currentTab];
     updateLineNumbers();
   });
 });
 
-/* === FORMATTERS ===
-   Keep simple but robust HTML formatter using DOM parsing
-*/
+btnFormat.addEventListener("click", () => {
+  let val = codeInput.value.trim();
+  if (!val) return;
 
-/* HTML formatter: uses DOM parsing then pretty-prints with indentation.
-   Handles void elements (img, br, hr, input, meta, link) as self-closing.
-*/
-function formatHTML(input) {
-  if (!input) return "";
-  // Normalize whitespace between tags to avoid text nodes with excessive spaces
-  // We'll parse using a template element to allow fragments.
-  const wrapper = document.createElement('div');
-  try {
-    wrapper.innerHTML = input;
-  } catch (e) {
-    // fallback simple split if parsing fails
-    return prettifyByRegex(input);
-  }
+  let formatted = val;
+  if (currentTab === "html") formatted = formatHTML(val);
+  else if (currentTab === "css") formatted = formatCSS(val);
+  else if (currentTab === "js") formatted = formatJS(val);
 
-  const voidTags = new Set(['area','base','br','col','embed','hr','img','input','link','meta','param','source','track','wbr']);
+  codeInput.value = formatted;
+  updateLineNumbers();
+});
 
-  function isInlineTag(tag) {
-    // common inline tags: keep their text inline (don't force newlines inside)
-    return /^(a|span|b|i|u|strong|em|small|img|input|label|sup|sub|code|var|s)$/i.test(tag);
-  }
-
-  function dump(node, level) {
-    const indent = '  '.repeat(level);
-    let out = '';
-    if (node.nodeType === Node.TEXT_NODE) {
-      const text = node.nodeValue.replace(/\s+/g, ' ');
-      if (text.trim()) {
-        out += indent + text.trim() + '\n';
-      }
-      return out;
-    }
-    if (node.nodeType !== Node.ELEMENT_NODE) return out;
-
-    const tag = node.tagName.toLowerCase();
-    let open = '<' + tag;
-    for (let i = 0; i < node.attributes.length; i++) {
-      const a = node.attributes[i];
-      // keep attribute spacing tidy
-      open += ' ' + a.name + '="' + a.value + '"';
-    }
-    open += '>';
-
-    const children = Array.from(node.childNodes).filter(n => !(n.nodeType === 3 && !n.nodeValue.trim()));
-
-    if (children.length === 0) {
-      if (voidTags.has(tag)) {
-        // void element: print self-closing style for readability
-        out += indent + '<' + tag;
-        for (let i = 0; i < node.attributes.length; i++) {
-          const a = node.attributes[i];
-          out += ' ' + a.name + '="' + a.value + '"';
-        }
-        out += ' />\n';
-      } else {
-        out += indent + open.replace(/>$/,'/>') + '\n';
-      }
-    } else {
-      // If element is inline and has a single text child, keep it on one line
-      if (children.length === 1 && children[0].nodeType === Node.TEXT_NODE && isInlineTag(tag)) {
-        const txt = children[0].nodeValue.replace(/\s+/g,' ').trim();
-        out += indent + open.replace(/>$/,'') + txt + '</' + tag + '>\n';
-      } else {
-        out += indent + open + '\n';
-        children.forEach(c => out += dump(c, level + 1));
-        out += indent + '</' + tag + '>\n';
-      }
-    }
-    return out;
-  }
-
-  let result = '';
-  Array.from(wrapper.childNodes).forEach(n => { result += dump(n, 0); });
-  return result.trim();
+// === HTML PRETTY FORMAT ===
+function formatHTML(html) {
+  const voidTags = /^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/i;
+  html = html.replace(/>\s+</g, '><').trim();
+  const tokens = html.split(/(?=<)|(?<=>)/g).filter(Boolean);
+  let indent = 0, formatted = '';
+  tokens.forEach(t => {
+    if (t.match(/^<\/\w/)) indent--;
+    formatted += '  '.repeat(Math.max(indent, 0)) + t.trim() + '\n';
+    if (t.match(/^<\w[^>]*[^/]>$/) && !t.match(voidTags)) indent++;
+  });
+  return formatted.trim();
 }
 
-// Fallback simple prettifier: insert newlines between tags and indent by braces of sorts
-function prettifyByRegex(input) {
-  // naive: put each tag on its own line, then indent by counting opens/closes
-  const parts = input.replace(/>\s+</g, '><').replace(/</g, '~::~<').split('~::~').filter(Boolean);
-  let level = 0;
-  const out = parts.map(part => {
-    part = part.trim();
-    if (!part) return '';
-    if (/^<\/\w/.test(part)) {
-      level = Math.max(0, level - 1);
-    }
-    const pad = '  '.repeat(level);
-    if (/^<\w[^>]*[^\/]>$/.test(part) && !part.includes('</')) {
-      const res = pad + part;
-      level++;
-      return res;
-    }
-    return pad + part;
-  }).filter(Boolean).join('\n');
-  return out.trim();
-}
-
-/* CSS & JS formatters: simple indentation improvements (non-breaking) */
-function formatCSS(input) {
-  if (!input) return "";
-  const tab = '  ';
-  let indent = 0;
-  let out = '';
-  // remove excessive whitespace but keep meaningful spaces
-  input = input.replace(/\s*([\{\};])\s*/g, '$1').replace(/\s+/g, ' ').trim();
-  for (let i = 0; i < input.length; i++) {
-    const ch = input[i];
-    if (ch === '{') { out = out.trimEnd() + ' {\n'; indent++; out += tab.repeat(indent); }
-    else if (ch === '}') { indent = Math.max(0, indent - 1); out = out.trimEnd() + '\n' + tab.repeat(indent) + '}\n' + tab.repeat(indent); }
-    else if (ch === ';') { out += ';\n' + tab.repeat(indent); }
+// === CSS SIMPLE FORMAT ===
+function formatCSS(css) {
+  css = css.replace(/\s*([\{\};:])\s*/g, '$1').trim();
+  let indent = 0, out = '';
+  for (let ch of css) {
+    if (ch === '{') { out += ' {\n' + '  '.repeat(++indent); }
+    else if (ch === '}') { indent--; out += '\n' + '  '.repeat(indent) + '}\n'; }
+    else if (ch === ';') { out += ';\n' + '  '.repeat(indent); }
     else out += ch;
   }
   return out.trim();
 }
-function formatJS(input) {
-  if (!input) return "";
-  const tab = '  ';
+
+// === JS SIMPLE FORMAT ===
+function formatJS(js) {
+  js = js.replace(/\s+/g, ' ').trim();
   let indent = 0, out = '';
-  input = input.replace(/\s+/g, ' ').trim();
-  let inString = false, strChar = '';
-  for (let i = 0; i < input.length; i++) {
-    const ch = input[i], prev = input[i-1];
-    if (!inString && (ch === '"' || ch === "'" || ch === '`')) { inString = true; strChar = ch; out += ch; continue; }
-    if (inString) { out += ch; if (ch === strChar && prev !== '\\') inString = false; continue; }
-    if (ch === '{') { out = out.trimEnd() + ' {\n' + tab.repeat(++indent); continue; }
-    if (ch === '}') { indent = Math.max(0, indent - 1); out = out.trimEnd() + '\n' + tab.repeat(indent) + '}\n' + tab.repeat(indent); continue; }
-    if (ch === ';') { out += ';\n' + tab.repeat(indent); continue; }
-    out += ch;
+  for (let ch of js) {
+    if (ch === '{') { out += ' {\n' + '  '.repeat(++indent); }
+    else if (ch === '}') { indent--; out += '\n' + '  '.repeat(indent) + '}\n'; }
+    else if (ch === ';') { out += ';\n' + '  '.repeat(indent); }
+    else out += ch;
   }
   return out.trim();
 }
-
-/* === Format button behavior === */
-btnFormat.addEventListener("click", () => {
-  if (codeInput.hasAttribute("readonly")) {
-    // back to edit mode
-    codeInput.removeAttribute("readonly");
-    btnFormat.textContent = "Format";
-    updateLineNumbers();
-    return;
-  }
-
-  const val = codeInput.value || "";
-  if (!val.trim()) return;
-
-  let formatted = val;
-  try {
-    if (currentTab === "html") formatted = formatHTML(val);
-    else if (currentTab === "css") formatted = formatCSS(val);
-    else if (currentTab === "js") formatted = formatJS(val);
-  } catch (e) {
-    // fallback to naive prettifier
-    formatted = prettifyByRegex(val);
-  }
-
-  // set formatted content into textarea and lock it (preview mode)
-  codeInput.value = formatted;
-  codeInput.setAttribute("readonly", "true");
-  btnFormat.textContent = "Kembali Edit";
-  updateLineNumbers();
-});
-
-/* initialize per-tab storage and behavior */
-storageRaw.html = storageRaw.html || "";
-storageRaw.css = storageRaw.css || "";
-storageRaw.js = storageRaw.js || "";
 </script>
+
 </body>
 </html>
