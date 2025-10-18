@@ -5,79 +5,97 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Twibbon | Memproses Foto</title>
     <style>
-        /* CSS Sederhana */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            background-color: #f4f4f4;
-            color: #333;
-        }
-        
-        /* Area Pratinjau Foto */
-        #preview-container {
-            position: relative;
-            width: 300px;
-            height: 300px;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;
-            background-color: #fff;
-        }
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        background-color: #f4f7f9; /* Abu Muda untuk Body */
+        color: #333;
+    }
 
-        #user-photo {
-            width: 100%;
-            height: 100%;
-            object-fit: cover; /* Pastikan foto menutupi area */
-        }
-        
-        /* Overlay Spinner dan Tips */
-        #processing-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background-color: rgba(0, 0, 0, 0.6); /* Semi-transparan gelap */
-            color: white;
-            padding: 20px;
-            box-sizing: border-box;
-        }
+    /* Gaya Card */
+    .card {
+        background-color: #ffffff; /* Putih untuk Card */
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        width: 90%;
+        max-width: 400px;
+        text-align: center;
+    }
+    
+    /* Area Pratinjau Foto */
+    #preview-container {
+        position: relative;
+        width: 250px;
+        height: 250px;
+        border-radius: 50%; /* Dibuat bulat untuk profil */
+        overflow: hidden;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        display: inline-block;
+    }
 
-        /* Spinner */
-        .spinner {
-            border: 6px solid rgba(255, 255, 255, 0.3);
-            border-top: 6px solid #00ff73; /* Warna hijau terang */
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+    #user-photo {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    /* Overlay Pemrosesan */
+    #processing-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background-color: rgba(26, 32, 44, 0.7); /* Biru gelap semi-transparan */
+        color: white;
+        padding: 20px;
+        box-sizing: border-box;
+    }
 
-        #processing-tips {
-            margin-top: 20px;
-            font-size: 14px;
-            font-weight: bold;
-            text-align: center;
-        }
+    /* Spinner */
+    .spinner {
+        border: 6px solid rgba(255, 255, 255, 0.3);
+        border-top: 6px solid #10b981; /* Hijau modern */
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
 
-    </style>
+    #processing-tips {
+        margin-top: 15px;
+        font-size: 0.95em;
+        font-weight: 500;
+        text-align: center;
+        max-width: 90%;
+    }
+
+    h2 {
+        color: #1f2937;
+        margin-top: 10px;
+        font-weight: 600;
+        font-size: 1.5em;
+    }
+        </style>
 </head>
 <body>
 
+<div class="card">
     <div id="preview-container">
         <img id="user-photo" src="" alt="Foto Unggahan Pengguna">
         
@@ -88,6 +106,7 @@
     </div>
     
     <h2>Sedang Memproses Foto Anda...</h2>
+</div>
 
     <script>
         const tips = [
